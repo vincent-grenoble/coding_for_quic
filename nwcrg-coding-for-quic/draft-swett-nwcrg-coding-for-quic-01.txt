@@ -19,7 +19,7 @@ Abstract
    This document focusses on the integration of FEC coding in the QUIC
    transport protocol in order to recover from packet losses in QUIC
    sessions.  This document does not specify any code but defines
-   mechanisms to negociate and integrate FEC Schemes in QUIC.  By using
+   mechanisms to negotiate and integrate FEC Schemes in QUIC.  By using
    proactive loss recovery, it is expected to improve QUIC performance
    in sessions impacted by losses.  More precisely it is expected to
    improve QUIC performance with real-time sessions (since FEC coding
@@ -116,19 +116,19 @@ Internet-Draft               Coding for QUIC                    May 2018
 
 1.  Introduction
 
-   QUIC is a new transport that wants to improve network performance by
+   QUIC is a new transport that aims at improving network performance by
    enabling out of order delivery, partial reliability, and methods of
    recovery besides retransmission while also improving security.  This
    document specifies a framework to enable FEC codes to be used to
    recover from lost packets within a single QUIC stream or across
    several QUIC streams.
 
-   The ability to add FEC coding in QUIC could be benefic in the
+   The ability to add FEC coding in QUIC could be beneficial in the
    following situations:
 
    o  robust transmission of latency sensitive traffic, for instance
       real-time flows, since it enables to recover packet losses
-      independantly of the round trip time;
+      independently of the round trip time;
 
    o  transmission of content to a large set of QUIC reception
       endpoints, since the same repair content may help recovering
@@ -193,7 +193,7 @@ Internet-Draft               Coding for QUIC                    May 2018
    first case, the input flow must be first segmented into a sequence of
    blocks, FEC encoding and decoding being performed independently on a
    per-block basis.  In the second case rely, a sliding encoding window
-   continuously slides over the input flow.  It is envisionned that the
+   continuously slides over the input flow.  It is envisioned that the
    two classes of codes could be used to bring FEC protection to QUIC.
 
 3.2.  FEC Scheme Negotiation
@@ -248,14 +248,14 @@ Internet-Draft               Coding for QUIC                    May 2018
 3.4.  FEC Protection at the Stream Level
 
    FEC encoding is applied at the stream level, within a single stream
-   or accross two or more streams of the same QUIC session.  This is
-   motivated by the fact that FEC protection is not necessarily benefic
-   to all data streams, but only to a subset of them.  For instance FEC
-   protection can be highly benefic to live video streams whose real-
-   time requirements for which the proactive erasure correction feature
-   of FEC, independant of the RTT, should be highly beneficial.  On the
-   opposite, FEC protection is probably less attractive for latency
-   insensitive bulk flows.
+   or across two or more streams of the same QUIC session.  This is
+   motivated by the fact that FEC protection is not necessarily
+   beneficial to all data streams, but only to a subset of them.  For
+   instance FEC protection can be highly beneficial to live video
+   streams whose real-time requirements for which the proactive erasure
+   correction feature of FEC, independent of the RTT, should be highly
+   beneficial.  On the opposite, FEC protection is probably less
+   attractive for latency insensitive bulk flows.
 
    In order to facilitate experiments, and in order to enable backward
    compatibility, the STREAM frames that carry application data are kept
@@ -329,7 +329,7 @@ Internet-Draft               Coding for QUIC                    May 2018
    abstraction.  Hereafter we consider a unidirectional data flow
    between a QUIC sending endpoint and one (or more) QUIC reception
    endpoints.  Without any loss of generality, the case of bidirectional
-   flows will be considered as several independant unidirectional flows.
+   flows will be considered as several independent unidirectional flows.
 
 
 
@@ -348,7 +348,7 @@ Internet-Draft               Coding for QUIC                    May 2018
    carries data contains an Offset field that indicates the offset
    within the stream of the first byte of data, as well as a Length
    field that indicates the number of bytes contained in the Stream Data
-   field.  Upon receiving a STREAM frame, using the Offset and Lenght
+   field.  Upon receiving a STREAM frame, using the Offset and Length
    fields, a QUIC reception endpoint can easily copy data in its
    reception buffer.  Because a QUIC Packet may be lost during
    transmission, the reception buffer may have gaps.
@@ -356,7 +356,7 @@ Internet-Draft               Coding for QUIC                    May 2018
    Figure 1 illustrates how source symbols are mapped to the QUIC
    transmission or reception buffers.  Since any source (and repair)
    symbol is of fixed size (E bytes) for a given stream, since QUIC
-   guarranties that the first byte in the stream has an offset of 0, the
+   guaranties that the first byte in the stream has an offset of 0, the
    position of each source symbol is known.
 
     < -E- > < -E- > < -E- > < -E- >
@@ -401,7 +401,7 @@ Internet-Draft               Coding for QUIC                    May 2018
 
 5.2.  Signaling Considerations within STREAM and REPAIR Frames
 
-   Once the initial negociation succeeded and an appropriate FEC Scheme
+   Once the initial negotiation succeeded and an appropriate FEC Scheme
    chosen between the QUIC endpoints, data is exchanged as follows.
    Source data is transmitted within STREAM frames, as would happen
    without any FEC based loss recovery mechanism.  Repair data, computed
@@ -462,7 +462,7 @@ Internet-Draft               Coding for QUIC                    May 2018
 
    o  Upon time-out, the application falls back to the alternative re-
       transmission based loss recovery mechanism for the bytes of the
-      last uncomplete source symbol;
+      last incomplete source symbol;
 
    Editor's notes:  Clearly, the above mechanism requires more thoughts
        as well as experimental work.  The "end of stream" situation may
@@ -507,7 +507,7 @@ Internet-Draft               Coding for QUIC                    May 2018
 
 
           balanced by significant performance improvements compared to
-          an independant protection on each stream (intuition is yes,
+          an independent protection on each stream (intuition is yes,
           the low bitrate flow is better protected iff the encoding
           window is large enough)?  And when the various streams have a
           comparable bitrate?  More work (incl. experimental work) is
@@ -525,7 +525,7 @@ Internet-Draft               Coding for QUIC                    May 2018
 
    When creating the block (block FEC code) or encoding window (sliding
    window FEC code), the source symbols to consider of each stream are
-   appended.  All the relevent source symbols of the first stream are
+   appended.  All the relevant source symbols of the first stream are
    appended, followed by all the source symbols of the second stream,
    etc.  These sequences do not follow any timing consideration in order
    to simplify signaling.
@@ -568,14 +568,14 @@ Internet-Draft               Coding for QUIC                    May 2018
    Editor's notes:  Check that indeed, with FEC protection across
        several streams, assigning a REPAIR frame to any of the streams
        it protects is meaningful.  Should an approach for selecting one
-       stream (and Stream ID) be prefered?
+       stream (and Stream ID) be preferred?
 
    The REPAIR frame format is FEC Scheme dependent and MUST be defined
    by document specifying a FEC Scheme.  One of the key information of
    this REPAIR frame is the composition of the block (with block codes)
    or encoding window (with sliding window codes) used to perform FEC
    encoding.  Indeed, this is the only manner to convey this information
-   since an application flow is not predictible (e.g., if an application
+   since an application flow is not predictable (e.g., if an application
    flow is momentarily suspended, the composition of the block or
    encoding window will be affected).  One possibility is to list, in
    each REPAIR frame header:
