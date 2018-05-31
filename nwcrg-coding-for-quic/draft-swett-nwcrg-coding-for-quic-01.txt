@@ -82,26 +82,26 @@ Table of Contents
            Window Codes  . . . . . . . . . . . . . . . . . . . . . .   4
      3.2.  FEC Scheme Negotiation  . . . . . . . . . . . . . . . . .   4
      3.3.  FEC Protection Within an Encrypted Channel  . . . . . . .   5
-     3.4.  FEC Protection at the Stream Level  . . . . . . . . . . .   5
-     3.5.  About Gaps in the Set of Source Symbols Considered During
-           Encoding  . . . . . . . . . . . . . . . . . . . . . . . .   5
+     3.4.  About Middleboxes . . . . . . . . . . . . . . . . . . . .   5
+     3.5.  FEC Protection at the Stream Level  . . . . . . . . . . .   5
+     3.6.  About Gaps in the Set of Source Symbols Considered During
+           Encoding  . . . . . . . . . . . . . . . . . . . . . . . .   6
    4.  FEC Scheme Negotiation in QUIC  . . . . . . . . . . . . . . .   6
-   5.  Procedures when Protecting a Single QUIC Stream . . . . . . .   6
+   5.  Procedures when Protecting a Single QUIC Stream . . . . . . .   7
      5.1.  Application data, STREAM Frame data and Source Symbols  .   7
      5.2.  Signaling Considerations within STREAM and REPAIR Frames    8
-     5.3.  Management of Silent Periods and End of Stream  . . . . .   8
-   6.  Procedures when Protecting Several QUIC Streams . . . . . . .   9
+     5.3.  Management of Silent Periods and End of Stream  . . . . .   9
+   6.  Procedures when Protecting Several QUIC Streams . . . . . . .  10
      6.1.  Application data, STREAM Frame data and Source Symbols  .  10
      6.2.  Block or Encoding Window Management . . . . . . . . . . .  10
-     6.3.  Signaling Considerations within STREAM and REPAIR Frames   10
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
-   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
+     6.3.  Signaling Considerations within STREAM and REPAIR Frames   11
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  12
+   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  12
    9.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  12
    10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
      10.1.  Normative References . . . . . . . . . . . . . . . . . .  12
-     10.2.  Informative References . . . . . . . . . . . . . . . . .  12
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  12
-
+     10.2.  Informative References . . . . . . . . . . . . . . . . .  13
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  13
 
 
 
@@ -155,13 +155,13 @@ Internet-Draft               Coding for QUIC                    May 2018
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119].
 
-   This document uses the following definitions and abbreviations:
+   This document uses the following definitions:
 
-   E: size of an encoding symbol (i.e., source or repair symbol),
-      assumed fixed (in bytes)
+   Source Symbol:  a unit of data originating from the source that is
+      used as input to encoding operations
 
-
-
+   Repair Symbol:  a unit of data that is the result of a coding
+      operation
 
 
 
@@ -169,6 +169,15 @@ Swett, et al.           Expires December 2, 2018                [Page 3]
 
 Internet-Draft               Coding for QUIC                    May 2018
 
+
+   Packet versus Symbol:  a Packet is the unit of data that is exchanged
+      over the network while a Symbol is the unit of data that is
+      manipulated during the encoding and decoding operations
+
+   This document uses the following abbreviations:
+
+   E: size of an encoding symbol (i.e., source or repair symbol),
+      assumed fixed (in bytes)
 
 3.  General Design Considerations
 
@@ -209,15 +218,6 @@ Internet-Draft               Coding for QUIC                    May 2018
 
        *  It is not clear whether negotiation is meant to select a
           single FEC Scheme or multiple potential FEC Schemes.  In the
-          second case (multiple FEC) it is required to have a
-          complementary mechanism to indicate which FEC Scheme is used
-          in a given REPAIR frame (which could be done through as many
-          REPAIR frame type values as potential FEC Scheme negotiated).
-
-       *  It is not clear whether negotiation is carried out at QUIC
-          level (and therefore for multiple streams) or at a stream
-          level (and therefore multiple streams may use multiple FEC
-
 
 
 
@@ -226,6 +226,14 @@ Swett, et al.           Expires December 2, 2018                [Page 4]
 Internet-Draft               Coding for QUIC                    May 2018
 
 
+          second case (multiple FEC) it is required to have a
+          complementary mechanism to indicate which FEC Scheme is used
+          in a given REPAIR frame (which could be done through as many
+          REPAIR frame type values as potential FEC Scheme negotiated).
+
+       *  It is not clear whether negotiation is carried out at QUIC
+          level (and therefore for multiple streams) or at a stream
+          level (and therefore multiple streams may use multiple FEC
           Schemes).  The terminology used above should be updated to
           reflect the choice.
 
@@ -245,7 +253,16 @@ Internet-Draft               Coding for QUIC                    May 2018
    negotiation mechanism does not allow sending extension frames prior
    to handshake completion.
 
-3.4.  FEC Protection at the Stream Level
+3.4.  About Middleboxes
+
+   The coding approach described in this document does not allow on path
+   elements (middleboxes) to take part in FEC protection.  The traffic
+   being fully encrypting, the middleboxes are not in position to tell
+   the difference between QUIC packets containing STREAM frames and
+   those containing REPAIR frames, nor adding any redundant traffic to a
+   given stream.
+
+3.5.  FEC Protection at the Stream Level
 
    FEC encoding is applied at the stream level, within a single stream
    or across two or more streams of the same QUIC session.  This is
@@ -257,13 +274,21 @@ Internet-Draft               Coding for QUIC                    May 2018
    beneficial.  On the opposite, FEC protection is probably less
    attractive for latency insensitive bulk flows.
 
+
+
+
+Swett, et al.           Expires December 2, 2018                [Page 5]
+
+Internet-Draft               Coding for QUIC                    May 2018
+
+
    In order to facilitate experiments, and in order to enable backward
    compatibility, the STREAM frames that carry application data are kept
    unmodified.  On the opposite, frames that carry one or more repair
    symbols use a dedicated REPAIR frame type, chosen within the type
    range dedicated to "Extension Frames".
 
-3.5.  About Gaps in the Set of Source Symbols Considered During Encoding
+3.6.  About Gaps in the Set of Source Symbols Considered During Encoding
 
    A given FEC Scheme MAY support or not the presence of gaps in the set
    of source symbols that constitute a block (for Block codes) or an
@@ -274,13 +299,6 @@ Internet-Draft               Coding for QUIC                    May 2018
    is particularly true with Sliding Window codes because of their
    flexibility during FEC encoding (the encoding window can change
    between two consecutive FEC encodings).
-
-
-
-Swett, et al.           Expires December 2, 2018                [Page 5]
-
-Internet-Draft               Coding for QUIC                    May 2018
-
 
    Supporting the presence of gaps could be motivated by a desire to
    reduce encoding and decoding complexity.  However this choice can
@@ -312,6 +330,14 @@ Internet-Draft               Coding for QUIC                    May 2018
 
    Editor's notes:
 
+
+
+
+Swett, et al.           Expires December 2, 2018                [Page 6]
+
+Internet-Draft               Coding for QUIC                    May 2018
+
+
        *  It is likely that FEC Scheme negotiation requires the use of a
           new dedicated Extension Frame Type.  The details remain TBD.
 
@@ -330,13 +356,6 @@ Internet-Draft               Coding for QUIC                    May 2018
    between a QUIC sending endpoint and one (or more) QUIC reception
    endpoints.  Without any loss of generality, the case of bidirectional
    flows will be considered as several independent unidirectional flows.
-
-
-
-Swett, et al.           Expires December 2, 2018                [Page 6]
-
-Internet-Draft               Coding for QUIC                    May 2018
-
 
    This section focusses on the simple case where FEC protection is
    applied to a single QUIC stream.
@@ -358,6 +377,22 @@ Internet-Draft               Coding for QUIC                    May 2018
    symbol is of fixed size (E bytes) for a given stream, since QUIC
    guaranties that the first byte in the stream has an offset of 0, the
    position of each source symbol is known.
+
+
+
+
+
+
+
+
+
+
+
+
+Swett, et al.           Expires December 2, 2018                [Page 7]
+
+Internet-Draft               Coding for QUIC                    May 2018
+
 
     < -E- > < -E- > < -E- > < -E- >
    +-------+-------+-------+-------+
@@ -386,14 +421,6 @@ Internet-Draft               Coding for QUIC                    May 2018
    STREAM frames, a situation that is considered as potentially harmful
    (the unit of control, the source symbol, and unit of transmission,
    the frame, are not aligned).  However an overly small value also
-
-
-
-Swett, et al.           Expires December 2, 2018                [Page 7]
-
-Internet-Draft               Coding for QUIC                    May 2018
-
-
    increases processing complexity (FEC encoding and decoding are
    performed over larger linear systems).  An appropriate balance should
    be found.  The choice of a value for E is considered as out of scope
@@ -413,6 +440,15 @@ Internet-Draft               Coding for QUIC                    May 2018
    The REPAIR frame format is FEC Scheme dependent.  The document
    specifying a FEC Scheme to be used with QUIC MUST define the REPAIR
    frame format, among other things.
+
+
+
+
+
+Swett, et al.           Expires December 2, 2018                [Page 8]
+
+Internet-Draft               Coding for QUIC                    May 2018
+
 
    As explained above, source data is transmitted without any
    modification.  From this point of view, the use of FEC coding in QUIC
@@ -442,14 +478,6 @@ Internet-Draft               Coding for QUIC                    May 2018
    encoding and therefore the associated bytes of the application stream
    are not protected.  A similar problem arrives when a stream is
    finished, the application having no more data to transmit.  Here
-
-
-
-Swett, et al.           Expires December 2, 2018                [Page 8]
-
-Internet-Draft               Coding for QUIC                    May 2018
-
-
    also, in the general case, the last source symbol will not be filled
    and therefore the associated bytes of the application stream are not
    protected.
@@ -470,6 +498,13 @@ Internet-Draft               Coding for QUIC                    May 2018
        use of zero padding for transitory silent periods may add a lot
        of specification and implementation complexity.  This aspect
        needs more thoughts.
+
+
+
+Swett, et al.           Expires December 2, 2018                [Page 9]
+
+Internet-Draft               Coding for QUIC                    May 2018
+
 
 6.  Procedures when Protecting Several QUIC Streams
 
@@ -498,14 +533,6 @@ Internet-Draft               Coding for QUIC                    May 2018
        *  When two largely different streams are protected togethers
           (e.g., a high definition 4K video flow plus the associated
           relatively low-rate audio stream), is this extra complexity
-
-
-
-Swett, et al.           Expires December 2, 2018                [Page 9]
-
-Internet-Draft               Coding for QUIC                    May 2018
-
-
           balanced by significant performance improvements compared to
           an independent protection on each stream (intuition is yes,
           the low bitrate flow is better protected iff the encoding
@@ -527,6 +554,14 @@ Internet-Draft               Coding for QUIC                    May 2018
    window FEC code), the source symbols to consider of each stream are
    appended.  All the relevant source symbols of the first stream are
    appended, followed by all the source symbols of the second stream,
+
+
+
+Swett, et al.           Expires December 2, 2018               [Page 10]
+
+Internet-Draft               Coding for QUIC                    May 2018
+
+
    etc.  These sequences do not follow any timing consideration in order
    to simplify signaling.
 
@@ -553,15 +588,6 @@ Internet-Draft               Coding for QUIC                    May 2018
    Repair symbols, generated during FEC encoding as a linear combination
    of source symbols that belong to one or more of the streams, are
    transmitted within REPAIR frames.  Each REPAIR frame can be
-
-
-
-
-Swett, et al.           Expires December 2, 2018               [Page 10]
-
-Internet-Draft               Coding for QUIC                    May 2018
-
-
    associated to any of the input streams it protects, and therefore
    associated to any of the associated Stream IDs.
 
@@ -583,6 +609,15 @@ Internet-Draft               Coding for QUIC                    May 2018
    o  the actual number of streams considered (the maximum number is
       known after the negotiation step, but if one of the streams
       remains silent for some time, it may not contribute during
+
+
+
+
+Swett, et al.           Expires December 2, 2018               [Page 11]
+
+Internet-Draft               Coding for QUIC                    May 2018
+
+
       encoding and therefore be absent from the block or encoding
       window);
 
@@ -609,15 +644,6 @@ Internet-Draft               Coding for QUIC                    May 2018
 
    TBD
 
-
-
-
-
-Swett, et al.           Expires December 2, 2018               [Page 11]
-
-Internet-Draft               Coding for QUIC                    May 2018
-
-
 9.  Acknowledgments
 
    TBD
@@ -637,6 +663,16 @@ Internet-Draft               Coding for QUIC                    May 2018
               Requirement Levels", BCP 14, RFC 2119, DOI 10.17487/
               RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+
+
+Swett, et al.           Expires December 2, 2018               [Page 12]
+
+Internet-Draft               Coding for QUIC                    May 2018
+
 
 10.2.  Informative References
 
@@ -662,18 +698,6 @@ Authors' Addresses
    Email: ianswett@google.com
 
 
-
-
-
-
-
-
-
-Swett, et al.           Expires December 2, 2018               [Page 12]
-
-Internet-Draft               Coding for QUIC                    May 2018
-
-
    Marie-Jose Montpetit
    Triangle Video
    Boston, MA
@@ -688,30 +712,6 @@ Internet-Draft               Coding for QUIC                    May 2018
    France
 
    Email: vincent.roca@inria.fr
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

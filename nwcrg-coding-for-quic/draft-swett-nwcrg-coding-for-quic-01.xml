@@ -149,8 +149,16 @@ Terms and definitions that apply to coding are available in <xref target="nc-tax
 document are to be interpreted as described in <xref target="RFC2119"/>.
 </t>
 
+<t>This document uses the following definitions: <list style="hanging">
+<t hangText="Source Symbol:">	a unit of data originating from the source that is used as input to encoding operations</t>
 
-<t>This document uses the following definitions and abbreviations: <list style="hanging">
+<t hangText="Repair Symbol:">	a unit of data that is the result of a coding operation</t>
+
+<t hangText="Packet versus Symbol:">	a Packet is the unit of data that is exchanged over the network while a Symbol is
+	the unit of data that is manipulated during the encoding and decoding operations</t>
+</list></t>
+
+<t>This document uses the following abbreviations: <list style="hanging">
 <t hangText="E:">		size of an encoding symbol (i.e., source or repair symbol), assumed fixed (in bytes)</t>
 </list></t>
 
@@ -226,6 +234,16 @@ Coding should be applied to all QUIC packets except the 0RTT payloads.
 
 		</section>
 
+		<section title="About Middleboxes">
+		<!-- ====================== -->
+
+<t>
+The coding approach described in this document does not allow on path elements (middleboxes) to take part in FEC protection.
+The traffic being fully encrypting, the middleboxes are not in position to tell the difference between QUIC packets containing STREAM frames and those containing REPAIR frames, nor adding any redundant traffic to a given stream.
+</t>
+
+		</section>
+
 		<section title="FEC Protection at the Stream Level">
 		<!-- ====================== -->
 
@@ -293,7 +311,8 @@ FEC Scheme negotiation has several goals:
 	<t> It is likely that FEC Scheme negotiation requires the use of a new dedicated Extension Frame Type. The details remain TBD.</t>
 	<t> The Negotiation Frame Type format remains TBD.</t>
 	<t> How to communicate the parameters remains TBD.</t>
-	<t> In case negotiation is different when protecting a single versus several streams, this section should be moved to the respective sections.</t>
+	<t> The present document only provides high level principles, the details are of course the responsibility of the FEC Scheme.</t>
+	<t> In case negotiation is different when protecting a single versus several streams, this section may be moved to the respective sections.</t>
 	</list></t>
 </list>
 </t>
