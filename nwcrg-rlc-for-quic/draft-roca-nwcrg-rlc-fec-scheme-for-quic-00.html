@@ -377,12 +377,13 @@
 <link href="#rfc.section.1" rel="Chapter" title="1 Introduction"/>
 <link href="#rfc.section.2" rel="Chapter" title="2 Definitions and Abbreviations"/>
 <link href="#rfc.section.3" rel="Chapter" title="3 Procedures"/>
+<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Source Symbols Mapping"/>
+<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Pseudo-Random Number Generator (PRNG)"/>
+<link href="#rfc.section.3.3" rel="Chapter" title="3.3 Coding Coefficients Generation Function"/>
 <link href="#rfc.section.4" rel="Chapter" title="4 Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single QUIC Stream"/>
 <link href="#rfc.section.4.1" rel="Chapter" title="4.1 Formats and Codes"/>
-<link href="#rfc.section.4.1.1" rel="Chapter" title="4.1.1 FEC Framework Configuration Information"/>
-<link href="#rfc.section.4.1.1.1" rel="Chapter" title="4.1.1.1 FEC Encoding ID"/>
-<link href="#rfc.section.4.1.1.2" rel="Chapter" title="4.1.1.2 FEC Scheme-Specific Information"/>
-<link href="#rfc.section.4.1.2" rel="Chapter" title="4.1.2 REPAIR frame format and Repair FEC Payload ID"/>
+<link href="#rfc.section.4.1.1" rel="Chapter" title="4.1.1 Configuration Information"/>
+<link href="#rfc.section.4.1.2" rel="Chapter" title="4.1.2 REPAIR Frame Format (also Known as Repair FEC Payload ID)"/>
 <link href="#rfc.section.4.1.3" rel="Chapter" title="4.1.3 Additional Procedures"/>
 <link href="#rfc.section.4.2" rel="Chapter" title="4.2 FEC Code Specification"/>
 <link href="#rfc.section.4.2.1" rel="Chapter" title="4.2.1 Encoding Side"/>
@@ -474,12 +475,13 @@
   	<li>1.   <a href="#rfc.section.1">Introduction</a></li>
 <li>2.   <a href="#rfc.section.2">Definitions and Abbreviations</a></li>
 <li>3.   <a href="#rfc.section.3">Procedures</a></li>
+<li>3.1.   <a href="#rfc.section.3.1">Source Symbols Mapping</a></li>
+<li>3.2.   <a href="#rfc.section.3.2">Pseudo-Random Number Generator (PRNG)</a></li>
+<li>3.3.   <a href="#rfc.section.3.3">Coding Coefficients Generation Function</a></li>
 <li>4.   <a href="#rfc.section.4">Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single QUIC Stream</a></li>
 <li>4.1.   <a href="#rfc.section.4.1">Formats and Codes</a></li>
-<li>4.1.1.   <a href="#rfc.section.4.1.1">FEC Framework Configuration Information</a></li>
-<li>4.1.1.1.   <a href="#rfc.section.4.1.1.1">FEC Encoding ID</a></li>
-<li>4.1.1.2.   <a href="#rfc.section.4.1.1.2">FEC Scheme-Specific Information</a></li>
-<li>4.1.2.   <a href="#rfc.section.4.1.2">REPAIR frame format and Repair FEC Payload ID</a></li>
+<li>4.1.1.   <a href="#rfc.section.4.1.1">Configuration Information</a></li>
+<li>4.1.2.   <a href="#rfc.section.4.1.2">REPAIR Frame Format (also Known as Repair FEC Payload ID)</a></li>
 <li>4.1.3.   <a href="#rfc.section.4.1.3">Additional Procedures</a></li>
 <li>4.2.   <a href="#rfc.section.4.2">FEC Code Specification</a></li>
 <li>4.2.1.   <a href="#rfc.section.4.2.1">Encoding Side</a></li>
@@ -527,6 +529,8 @@
 </dl>
 <h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#CommonProcedures" id="CommonProcedures">Procedures</a></h1>
 <p id="rfc.section.3.p.1">This section introduces the procedures that are used by these FEC Schemes.  </p>
+<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> <a href="#CommonProc_adui_creation" id="CommonProc_adui_creation">Source Symbols Mapping</a></h1>
+<p id="rfc.section.3.1.p.1">The present FEC Scheme follows the source symbols mapping specified in <a href="#Coding4QUIC">[Coding4QUIC]</a>.  <a href="#fig_frame_2_ss_mapping">Figure 1</a> illustrates this mapping.  </p>
 <div id="rfc.figure.1"/>
 <div id="fig_frame_2_ss_mapping"/>
 <pre>
@@ -540,14 +544,25 @@
 +-------+-------+----+             (incomplete)
 </pre>
 <p class="figure">Figure 1: Example of source symbol mapping, when the E value is relatively small.</p>
+<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#CommonProc_prng" id="CommonProc_prng">Pseudo-Random Number Generator (PRNG)</a></h1>
+<p id="rfc.section.3.2.p.1">The RLC FEC Schemes defined in this document rely on the TinyMT32 PRNG defined in <a href="#RLC">[RLC]</a>.  </p>
+<h1 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a> <a href="#CommonProc_coef_generation_func" id="CommonProc_coef_generation_func">Coding Coefficients Generation Function</a></h1>
+<p id="rfc.section.3.3.p.1">The coding coefficients, used during the encoding process, are generated at the RLC encoder by the generate_coding_coefficients() function each time a new repair symbol needs to be produced.  This specification uses the generate_coding_coefficients() defined in <a href="#RLC">[RLC]</a>.  </p>
 <h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#rlc-single-stream" id="rlc-single-stream">Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single QUIC Stream</a></h1>
-<p id="rfc.section.4.p.1">This fully-specified FEC Scheme defines the Sliding Window Random Linear Codes (RLC) over GF(2^^8).  </p>
+<p id="rfc.section.4.p.1">This fully-specified FEC Scheme defines the Sliding Window Random Linear Codes (RLC) over GF(2^^8) when protecting a single QUIC stream.  </p>
 <h1 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> <a href="#ArbitraryFlows_formatsAndCodes" id="ArbitraryFlows_formatsAndCodes">Formats and Codes</a></h1>
-<h1 id="rfc.section.4.1.1"><a href="#rfc.section.4.1.1">4.1.1.</a> FEC Framework Configuration Information</h1>
-<h1 id="rfc.section.4.1.1.1"><a href="#rfc.section.4.1.1.1">4.1.1.1.</a> FEC Encoding ID</h1>
-<h1 id="rfc.section.4.1.1.2"><a href="#rfc.section.4.1.1.2">4.1.1.2.</a> <a href="#ArbitraryFlows_fssi" id="ArbitraryFlows_fssi">FEC Scheme-Specific Information</a></h1>
-<h1 id="rfc.section.4.1.2"><a href="#rfc.section.4.1.2">4.1.2.</a> <a href="#ArbitraryFlows_repair_fpi" id="ArbitraryFlows_repair_fpi">REPAIR frame format and Repair FEC Payload ID</a></h1>
-<p id="rfc.section.4.1.2.p.1">The RLC FEC Scheme does not require any explicit Source FEC Payload ID, meaning that QUIC STREAM frames containing source data are not modified, whether or not RLC FEC protection is used or not.  On the opposite, the RLC FEC Scheme requires QUIC REPAIR frames to convey enough information as part of the REPAIR FEC Payload ID, or said differently according to QUIC terminology, REPAIR frame format.  </p>
+<h1 id="rfc.section.4.1.1"><a href="#rfc.section.4.1.1">4.1.1.</a> Configuration Information</h1>
+<p id="rfc.section.4.1.1.p.1">This section provides the RLC configuration information that needs to be shared during QUIC negotiation between the QUIC sender and receiver endpoints in order to synchronize them.  </p>
+<p/>
+
+<ul>
+  <li>FEC Encoding ID: the value assigned to this fully specified FEC Scheme MUST be XXXX, as assigned by IANA (<a href="#iana">Section 7</a>).  This FEC Encoding ID is used during the QUIC negotiation to uniquely identify the RLC FEC Scheme for QUIC;</li>
+  <li>Encoding symbol size, E (in bytes): a non-negative integer that indicates the size of each source and repair symbol, in bytes.  This element is required both by the QUIC sender endpoint (RLC encoder) and the QUIC receiver endpoint(s) (RLC decoder).</li>
+</ul>
+
+<p> </p>
+<h1 id="rfc.section.4.1.2"><a href="#rfc.section.4.1.2">4.1.2.</a> <a href="#ArbitraryFlows_repair_fpi" id="ArbitraryFlows_repair_fpi">REPAIR Frame Format (also Known as Repair FEC Payload ID)</a></h1>
+<p id="rfc.section.4.1.2.p.1">The RLC FEC Scheme does not require any explicit Source FEC Payload ID, meaning that QUIC STREAM frames containing source data are not modified, whether or not RLC FEC protection is used.  On the opposite, the RLC FEC Scheme requires QUIC REPAIR frames to convey enough information as part of the REPAIR FEC Payload ID, or said differently according to QUIC terminology, REPAIR frame format.  </p>
 <div id="rfc.figure.2"/>
 <div id="fig_repair_frame_format_1_stream"/>
 <pre>
@@ -556,7 +571,7 @@
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                         Stream ID (i)                       ...
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |               [First Source Symbol Offset (i)]              ...
+   |               [Offset of First Source Symbol in EW (i)]     ...
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                         [Length (i)]                        ...
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -565,6 +580,26 @@
    |                        Stream Data                          ...
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</pre>
 <p class="figure">Figure 2: REPAIR frame format when protecting a single QUIC stream.</p>
+<p id="rfc.section.4.1.2.p.2">More precisely, the REPAIR frame format/Repair FEC Payload ID is composed of the following fields (<a href="#fig_repair_frame_format_1_stream">Figure 2</a>): </p>
+
+<dl>
+  <dt>Stream ID (variable-size field):</dt>
+  <dd style="margin-left: 8">a variable-length integer indicating the stream ID of the stream. See <a href="#QUIC-transport">[QUIC-transport]</a>.  The Stream ID for an RLC REPAIR frame MUST be equal to the Stream ID used for the data stream it protects; </dd>
+  <dt>Offset of First Source Symbol in the Encoding Window (variable-size field):</dt>
+  <dd style="margin-left: 8">a variable-length integer specifying the byte offset in the stream for the first source symbol of the encoding window.</dd>
+  <dt>Length (variable-size field):</dt>
+  <dd style="margin-left: 8">a variable-length integer specifying the length of the Stream Data field in this REPAIR frame.  This length MUST be a non zero multiple of the source symbol size, E, since a REPAIR frame contains one or more repair symbols for this stream;</dd>
+  <dt>Repair_Key (16-bit field):</dt>
+  <dd style="margin-left: 8">this unsigned integer is used as a seed by the coefficient generation function (<a href="#CommonProc_coef_generation_func">Section 3.3</a>) in order to generate the desired number of coding coefficients.  When a FEC Repair Packet contains several repair symbols, this repair key value is that of the first repair symbol.  The remaining repair keys can be deduced by incrementing by 1 this value, up to a maximum value of 65535 after which it loops back to 0.  </dd>
+  <dt>Density Threshold for the coding coefficients, DT (4-bit field):</dt>
+  <dd style="margin-left: 8">this unsigned integer carries the Density Threshold (DT) used by the coding coefficient generation function <a href="#CommonProc_coef_generation_func">Section 3.3</a>.  More precisely, it controls the probability of having a non zero coding coefficient, which equals (DT+1) / 16.  When a FEC Repair Packet contains several repair symbols, the DT value applies to all of them; </dd>
+  <dt>Number of Source Symbols in the encoding window, NSS (12-bit field):</dt>
+  <dd style="margin-left: 8">this unsigned integer indicates the number of source symbols in the encoding window when this repair symbol was generated.  When a FEC Repair Packet contains several repair symbols, this NSS value applies to all of them; </dd>
+  <dt>Stream Data:</dt>
+  <dd style="margin-left: 8">the repair symbol data, or symbols data when multiple repair symbols are carried together. </dd>
+</dl>
+
+<p> </p>
 <h1 id="rfc.section.4.1.3"><a href="#rfc.section.4.1.3">4.1.3.</a> <a href="#ArbitraryFlows_Procedures" id="ArbitraryFlows_Procedures">Additional Procedures</a></h1>
 <h1 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a> <a href="#ArbitraryFlows_FECCodeSpecification" id="ArbitraryFlows_FECCodeSpecification">FEC Code Specification</a></h1>
 <h1 id="rfc.section.4.2.1"><a href="#rfc.section.4.2.1">4.2.1.</a> <a href="#ArbitraryFlows_FECCodeSpecification_encoding" id="ArbitraryFlows_FECCodeSpecification_encoding">Encoding Side</a></h1>
@@ -574,7 +609,14 @@
 <h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> Security Considerations</h1>
 <p id="rfc.section.6.p.1">TBD </p>
 <h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#iana" id="iana">IANA Considerations</a></h1>
-<p id="rfc.section.7.p.1">TBD </p>
+<p id="rfc.section.7.p.1">This document registers two values in the "QUIC FEC Encoding IDs" registry as follows: </p>
+
+<ul>
+  <li>XXXX refers to the Sliding Window Random Linear Codes (RLC) over GF(2^^8) FEC Scheme for a Single QUIC Stream, as defined in <a href="#rlc-single-stream">Section 4</a> of this document.</li>
+  <li>YYYY refers to the Sliding Window Random Linear Codes (RLC) over GF(2^^8) FEC Scheme for a Several QUIC Stream, as defined in <a href="#rlc-several-streams">Section 5</a> of this document.</li>
+</ul>
+
+<p> </p>
 <h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> Acknowledgments</h1>
 <p id="rfc.section.8.p.1">TBD </p>
 <h1 id="rfc.references"><a href="#rfc.references">9.</a> References</h1>
