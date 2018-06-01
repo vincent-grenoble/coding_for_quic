@@ -165,6 +165,20 @@ More specifically, this document uses the following definitions:
 This section introduces the procedures that are used by these FEC Schemes.
 </t>
 
+<figure anchor="fig_frame_2_ss_mapping" title="Example of source symbol mapping, when the E value is relatively small.">
+        <artwork><![CDATA[
+ < -E- > < -E- > < -E- > < -E- >
++-------+-------+-------+-------+
+|< -- Frame 1 -- >< ----- Frame |  source symbols 0, 1, 2, 3
++-------+-------+-------+-------+
+| 2 ----- >< --- Frame 3 -- >< -|  source symbols 4, 5, 6, 7
++-------+-------+----+--+-------+
+| Frame 4 - >< -F5- >|             source symbols 8, 9 and 10
++-------+-------+----+             (incomplete)
+]]></artwork>
+</figure>
+
+
 </section>
 
 <!-- =========================================================================================== -->
@@ -192,8 +206,33 @@ This fully-specified FEC Scheme defines the Sliding Window Random Linear Codes (
 
 		</section>
 
-		<section anchor="ArbitraryFlows_repair_fpi" title="Repair FEC Payload ID">
+		<section anchor="ArbitraryFlows_repair_fpi" title="REPAIR frame format and Repair FEC Payload ID">
 		<!-- ================ -->
+
+<t>
+The RLC FEC Scheme does not require any explicit Source FEC Payload ID, meaning that QUIC STREAM frames containing source data are not modified, whether or not RLC FEC protection is used or not.
+On the opposite, the RLC FEC Scheme requires QUIC REPAIR frames to convey enough information as part of the REPAIR FEC Payload ID, or said differently according to QUIC terminology, REPAIR frame format.
+</t>
+
+
+
+<figure anchor="fig_repair_frame_format_1_stream" title="REPAIR frame format when protecting a single QUIC stream.">
+        <artwork><![CDATA[
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         Stream ID (i)                       ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |               [First Source Symbol Offset (i)]              ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         [Length (i)]                        ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |       Repair_Key              |  DT   |NSS (# src symb in ew) |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        Stream Data                          ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]></artwork>
+</figure>
+
 		</section>
 
 		<section anchor="ArbitraryFlows_Procedures" title="Additional Procedures">

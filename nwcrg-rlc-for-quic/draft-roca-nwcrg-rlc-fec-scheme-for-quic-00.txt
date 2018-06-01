@@ -67,25 +67,25 @@ Table of Contents
    2.  Definitions and Abbreviations . . . . . . . . . . . . . . . .   3
    3.  Procedures  . . . . . . . . . . . . . . . . . . . . . . . . .   3
    4.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a
-       Single QUIC Stream  . . . . . . . . . . . . . . . . . . . . .   3
-     4.1.  Formats and Codes . . . . . . . . . . . . . . . . . . . .   3
+       Single QUIC Stream  . . . . . . . . . . . . . . . . . . . . .   4
+     4.1.  Formats and Codes . . . . . . . . . . . . . . . . . . . .   4
        4.1.1.  FEC Framework Configuration Information . . . . . . .   4
          4.1.1.1.  FEC Encoding ID . . . . . . . . . . . . . . . . .   4
          4.1.1.2.  FEC Scheme-Specific Information . . . . . . . . .   4
-       4.1.2.  Repair FEC Payload ID . . . . . . . . . . . . . . . .   4
+       4.1.2.  REPAIR frame format and Repair FEC Payload ID . . . .   4
        4.1.3.  Additional Procedures . . . . . . . . . . . . . . . .   4
      4.2.  FEC Code Specification  . . . . . . . . . . . . . . . . .   4
        4.2.1.  Encoding Side . . . . . . . . . . . . . . . . . . . .   4
-       4.2.2.  Decoding Side . . . . . . . . . . . . . . . . . . . .   4
+       4.2.2.  Decoding Side . . . . . . . . . . . . . . . . . . . .   5
    5.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting
-       Several QUIC Streams  . . . . . . . . . . . . . . . . . . . .   4
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
-   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   4
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   4
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .   5
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   5
+       Several QUIC Streams  . . . . . . . . . . . . . . . . . . . .   5
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
+   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   5
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .   6
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
 
 1.  Introduction
 
@@ -150,17 +150,17 @@ Internet-Draft                RLC for QUIC                     June 2018
    This section introduces the procedures that are used by these FEC
    Schemes.
 
-4.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single
-    QUIC Stream
+    < -E- > < -E- > < -E- > < -E- >
+   +-------+-------+-------+-------+
+   |< -- Frame 1 -- >< ----- Frame |  source symbols 0, 1, 2, 3
+   +-------+-------+-------+-------+
+   | 2 ----- >< --- Frame 3 -- >< -|  source symbols 4, 5, 6, 7
+   +-------+-------+----+--+-------+
+   | Frame 4 - >< -F5- >|             source symbols 8, 9 and 10
+   +-------+-------+----+             (incomplete)
 
-   This fully-specified FEC Scheme defines the Sliding Window Random
-   Linear Codes (RLC) over GF(2^^8).
-
-4.1.  Formats and Codes
-
-
-
-
+      Figure 1: Example of source symbol mapping, when the E value is
+                             relatively small.
 
 
 
@@ -170,19 +170,61 @@ Roca, et al.            Expires December 3, 2018                [Page 3]
 Internet-Draft                RLC for QUIC                     June 2018
 
 
+4.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single
+    QUIC Stream
+
+   This fully-specified FEC Scheme defines the Sliding Window Random
+   Linear Codes (RLC) over GF(2^^8).
+
+4.1.  Formats and Codes
+
 4.1.1.  FEC Framework Configuration Information
 
 4.1.1.1.  FEC Encoding ID
 
 4.1.1.2.  FEC Scheme-Specific Information
 
-4.1.2.  Repair FEC Payload ID
+4.1.2.  REPAIR frame format and Repair FEC Payload ID
+
+   The RLC FEC Scheme does not require any explicit Source FEC Payload
+   ID, meaning that QUIC STREAM frames containing source data are not
+   modified, whether or not RLC FEC protection is used or not.  On the
+   opposite, the RLC FEC Scheme requires QUIC REPAIR frames to convey
+   enough information as part of the REPAIR FEC Payload ID, or said
+   differently according to QUIC terminology, REPAIR frame format.
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                         Stream ID (i)                       ...
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |               [First Source Symbol Offset (i)]              ...
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                         [Length (i)]                        ...
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |       Repair_Key              |  DT   |NSS (# src symb in ew) |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                        Stream Data                          ...
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+    Figure 2: REPAIR frame format when protecting a single QUIC stream.
 
 4.1.3.  Additional Procedures
 
 4.2.  FEC Code Specification
 
 4.2.1.  Encoding Side
+
+
+
+
+
+
+
+Roca, et al.            Expires December 3, 2018                [Page 4]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
 
 4.2.2.  Decoding Side
 
@@ -215,17 +257,6 @@ Internet-Draft                RLC for QUIC                     June 2018
               <https://tools.ietf.org/html/draft-swett-nwcrg-coding-for-
               quic>.
 
-
-
-
-
-
-
-Roca, et al.            Expires December 3, 2018                [Page 4]
-
-Internet-Draft                RLC for QUIC                     June 2018
-
-
    [QUIC-transport]
               Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
               Multiplexed and Secure Transport", draft-ietf-quic-
@@ -237,6 +268,19 @@ Internet-Draft                RLC for QUIC                     June 2018
               Requirement Levels", BCP 14, RFC 2119, DOI 10.17487/
               RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+
+
+
+
+
+Roca, et al.            Expires December 3, 2018                [Page 5]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
 
    [RLC]      Roca, V., "Sliding Window Random Linear Code (RLC) Forward
               Erasure Correction (FEC) Scheme for FECFRAME", Work in
@@ -272,56 +316,12 @@ Authors' Addresses
    Email: ianswett@google.com
 
 
-
-
-
-
-
-Roca, et al.            Expires December 3, 2018                [Page 5]
-
-Internet-Draft                RLC for QUIC                     June 2018
-
-
    Marie-Jose Montpetit
    Triangle Video
    Boston, MA
    US
 
    Email: marie@mjmontpetit.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
