@@ -219,7 +219,7 @@ This specification uses the generate_coding_coefficients() defined in <xref targ
 This fully-specified FEC Scheme defines the Sliding Window Random Linear Codes (RLC) over GF(2^^8) when protecting a single QUIC stream.
 </t>
 
-	<section anchor="ArbitraryFlows_formatsAndCodes" title="Formats and Codes">
+	<section title="Formats and Codes">
 	<!-- ==================================== -->
 
 		<section title="Configuration Information">
@@ -243,34 +243,38 @@ This section provides the RLC configuration information that needs to be shared 
 
 		</section>
 
-		<section anchor="ArbitraryFlows_repair_fpi" title="REPAIR Frame Format (also Known as Repair FEC Payload ID)">
+		<section title="REPAIR Frame Format">
 		<!-- ================ -->
 
 <t>
-The RLC FEC Scheme does not require any explicit Source FEC Payload ID, meaning that QUIC STREAM frames containing source data are not modified, whether or not RLC FEC protection is used.
-On the opposite, the RLC FEC Scheme requires QUIC REPAIR frames to convey enough information as part of the REPAIR FEC Payload ID, or said differently according to QUIC terminology, REPAIR frame format.
+The RLC FEC Scheme does not use any explicit Source FEC Payload ID, meaning that QUIC STREAM frame format is not modified.
 </t>
 
+<t>
+On the opposite, the RLC FEC Scheme requires QUIC REPAIR frames to convey enough information.
+This section specifies the REPAIR frame format specific to the RLC FEC Scheme and a single QUIC stream.
+Note that the notion of REPAIR frame format is equivalent to the notion of Repair FEC Payload ID in <xref target="RLC"/>.
+</t>
 
 <figure anchor="fig_repair_frame_format_1_stream" title="REPAIR frame format when protecting a single QUIC stream.">
         <artwork><![CDATA[
-    0                   1                   2                   3
-    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                         Stream ID (i)                       ...
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |               [Offset of First Source Symbol in EW (i)]     ...
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                         [Length (i)]                        ...
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |       Repair_Key              |  DT   |NSS (# src symb in ew) |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                        Stream Data                          ...
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]></artwork>
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                         Stream ID (i)                       ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|               [Offset of First Source Symbol in EW (i)]     ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                         [Length (i)]                        ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Repair_Key              |  DT   |NSS (# src symb in ew) |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Stream Data                          ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]></artwork>
 </figure>
 
 <t>
-More precisely, the REPAIR frame format/Repair FEC Payload ID is composed of the following fields (<xref target="fig_repair_frame_format_1_stream"/>):
+More precisely, the REPAIR frame format is composed of the following fields (<xref target="fig_repair_frame_format_1_stream"/>):
 <list style="hanging">
 <t hangText="Stream ID (variable-size field):">
 	a variable-length integer indicating the stream ID of the stream. See <xref target="QUIC-transport"/>.
@@ -300,26 +304,26 @@ More precisely, the REPAIR frame format/Repair FEC Payload ID is composed of the
 	When a FEC Repair Packet contains several repair symbols, this NSS value applies to all of them; </t>
 
 <t hangText="Stream Data:">
-	the repair symbol data, or symbols data when multiple repair symbols are carried together. </t>
+	data for this repair symbol(s).</t>
 </list>
 </t>
 
 		</section>
 
-		<section anchor="ArbitraryFlows_Procedures" title="Additional Procedures">
+		<section title="Additional Procedures">
 		<!-- ================ -->
 		</section>
 
 	</section>
 
-	<section anchor="ArbitraryFlows_FECCodeSpecification" title="FEC Code Specification">
+	<section title="FEC Code Specification">
 	<!-- ================ -->
 
-		<section anchor="ArbitraryFlows_FECCodeSpecification_encoding" title="Encoding Side">
+		<section title="Encoding Side">
 		<!-- ================ -->
 		</section>
 
-		<section anchor="ArbitraryFlows_FECCodeSpecification_decoding" title="Decoding Side">
+		<section title="Decoding Side">
 		<!-- ================ -->
 		</section>
 
