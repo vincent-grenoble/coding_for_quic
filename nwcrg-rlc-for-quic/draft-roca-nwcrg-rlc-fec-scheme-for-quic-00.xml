@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!-- This template is for creating an Internet Draft using xml2rfc,
+    which is available here: http://xml.resource.org. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+    There has to be one entity for each item to be referenced. 
+    An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC2629 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2629.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs), 
+    please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+    (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="4"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space 
+    (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="no" ?>
+<!-- keep one blank line between list items -->
+<!-- end of list of popular I-D processing instructions -->
+<rfc category="info" docName="draft-roca-nwcrg-rlc-fec-scheme-for-quic-00" ipr="trust200902">
+ <!-- category values: std, bcp, info, exp, and historic
+    ipr values: trust200902, noModificationTrust200902, noDerivativesTrust200902,
+       or pre5378Trust200902
+    you can add the attributes updates="NNNN" and obsoletes="NNNN" 
+    they will automatically be output with "(if approved)" -->
+
+ <!-- ***** FRONT MATTER ***** -->
+
+<front>
+	
+   <title abbrev="RLC for QUIC">Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Schemes for QUIC</title>
+
+   <author fullname="Vincent Roca" initials="V." surname="Roca">
+     <organization>INRIA</organization>
+     <address>
+       <postal>
+         <street></street>
+         <city>Univ. Grenoble Alpes</city>
+         <region></region>
+         <code></code>
+         <country>France</country>
+       </postal>
+       <phone></phone>
+       <email>vincent.roca@inria.fr</email>
+     </address>
+   </author>
+
+   <author fullname="Ian Swett" initials="I." surname="Swett">
+     <organization>Google</organization>
+     <address>
+       <postal>
+         <street></street>
+         <city>Cambridge</city>
+         <region>MA</region>
+         <code></code>
+         <country>US</country>
+       </postal>
+       <phone></phone>
+       <email>ianswett@google.com</email>
+     </address>
+   </author>
+
+  <author fullname="Marie-Jose Montpetit" initials="M-J." surname="Montpetit">
+     <organization>Triangle Video</organization>
+     <address>
+       <postal>
+         <street></street>
+         <city>Boston</city>
+         <region>MA</region>
+         <code></code>
+         <country>US</country>
+       </postal>
+       <phone></phone>
+       <email>marie@mjmontpetit.com</email>
+     </address>
+   </author>
+
+   <date/>
+
+   <area>IRTF</area>
+
+   <workgroup>nwcrg</workgroup>
+
+   <keyword>RLC, FEC Scheme, QUIC, loss recovery, FEC coding, frame format, negotiation</keyword>
+
+   <abstract>
+<t>
+This document specifies Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Schemes for the QUIC transport protocol, in order to recover from packet losses.
+</t>
+   </abstract>
+
+</front>
+
+<middle>
+
+	<section title="Introduction">
+	<!-- ====================== -->
+
+<t>
+QUIC <xref target="QUIC-transport"/> is a new transport that aims at improving network performance by enabling out of order delivery, partial reliability, and methods of recovery besides retransmission, while also improving security.
+This document specifies FEC schemes for Sliding Window Random Linear Code (RLC) <xref target="RLC"/> to recover from lost packets within a single QUIC stream or across several QUIC streams, compliant with the FEC coding framework for QUIC <xref target="Coding4QUIC"/>.
+</t>
+
+<t>
+The ability to add FEC coding in QUIC may be beneficial in several situations:
+<list style="symbols">
+	<t>for a robust transmission of latency sensitive traffic, for instance real-time flows, since it enables to recover packet losses independently of the round trip time;</t>
+	<t>for the transmission of contents to a large set of QUIC reception endpoints, since the same repair frame may help recovering several different packet losses at different receivers;</t>
+	<t>for multipath communications, since repair traffic adds diversity.</t>
+</list>
+</t>
+
+	</section>
+
+	<section anchor="definitionsAndAbbreviations" title="Definitions and Abbreviations">
+	<!-- ====================== -->
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in <xref target="RFC2119"/>.
+</t>
+
+<t>
+Terms and definitions that apply to coding are available in <xref target="nc-taxonomy"/>.
+More specifically, this document uses the following definitions:
+<list style="hanging">
+	<t hangText="Packet versus Symbol:">	a Packet is the unit of data that is exchanged over the network while a Symbol is
+		the unit of data that is manipulated during the encoding and decoding operations</t>
+
+	<t hangText="Source Symbol:">	a unit of data originating from the source that is used as input to encoding operations</t>
+
+	<t hangText="Repair Symbol:">	a unit of data that is the result of a coding operation</t>
+
+</list></t>
+
+<t>This document uses the following abbreviations: <list style="hanging">
+	<t hangText="E:">		size of an encoding symbol (i.e., source or repair symbol), assumed fixed (in bytes)</t>
+</list></t>
+
+	</section>
+
+
+<!-- =========================================================================================== -->
+
+<section anchor="CommonProcedures" title="Procedures">
+<!-- ================ -->
+<t>
+This section introduces the procedures that are used by these FEC Schemes.
+</t>
+
+</section>
+
+<!-- =========================================================================================== -->
+
+<section anchor="rlc-single-stream" title="Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single QUIC Stream">
+<!-- ==================================== -->
+
+<t>
+This fully-specified FEC Scheme defines the Sliding Window Random Linear Codes (RLC) over GF(2^^8).
+</t>
+
+	<section anchor="ArbitraryFlows_formatsAndCodes" title="Formats and Codes">
+	<!-- ==================================== -->
+
+		<section title="FEC Framework Configuration Information">
+		<!-- ================ -->
+
+			<section title="FEC Encoding ID">
+			<!-- ================ -->
+			</section>
+
+			<section anchor="ArbitraryFlows_fssi" title="FEC Scheme-Specific Information">
+			<!-- ================ -->
+			</section>
+
+		</section>
+
+		<section anchor="ArbitraryFlows_repair_fpi" title="Repair FEC Payload ID">
+		<!-- ================ -->
+		</section>
+
+		<section anchor="ArbitraryFlows_Procedures" title="Additional Procedures">
+		<!-- ================ -->
+		</section>
+
+	</section>
+
+	<section anchor="ArbitraryFlows_FECCodeSpecification" title="FEC Code Specification">
+	<!-- ================ -->
+
+		<section anchor="ArbitraryFlows_FECCodeSpecification_encoding" title="Encoding Side">
+		<!-- ================ -->
+		</section>
+
+		<section anchor="ArbitraryFlows_FECCodeSpecification_decoding" title="Decoding Side">
+		<!-- ================ -->
+		</section>
+
+	</section>
+
+</section>
+
+
+<!-- =========================================================================================== -->
+
+<section anchor="rlc-several-streams" title="Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting Several QUIC Streams">
+<!-- ==================================== -->
+
+<t>
+This section focusses on the general case where FEC protection is globally applied across two or more QUIC streams.
+</t>
+
+</section>
+
+
+<!-- =========================================================================================== -->
+
+
+	<section title="Security Considerations">
+	<!-- ====================== -->
+
+<t>TBD
+</t>
+
+	</section>
+
+	<section anchor="iana" title="IANA Considerations">
+	<!-- ====================== -->
+
+<t>TBD
+</t>
+
+	</section>
+
+	<section title="Acknowledgments">
+	<!-- ====================== -->
+
+<t>TBD
+</t>
+
+	</section>
+
+
+</middle>
+
+<!-- =========================================================================================== -->
+
+ <back>
+
+	<references title="Normative References">
+	<!-- ====================== -->
+
+	&RFC2119;
+
+	<!-- https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-quic-transport.xml -->
+	<reference anchor="QUIC-transport" target="https://datatracker.ietf.org/doc/draft-ietf-quic-transport/">
+		<front>
+			<title>QUIC: A UDP-Based Multiplexed and Secure Transport</title>
+			<author initials="J." surname="Iyengar" fullname="Jana Iyengar" role="editor">
+				<organization>Fastly</organization>
+			</author>
+			<author initials="M." surname="Thomson" fullname="Martin Thomson" role="editor">
+				<organization>Mozilla</organization>
+			</author>
+			<date year="2018" month="May" day="22"/>
+		</front>
+		<seriesInfo name="Internet-Draft" value="draft-ietf-quic-transport-12"/>
+	</reference>
+
+	<reference anchor="RLC" target="https://tools.ietf.org/html/draft-ietf-tsvwg-rlc-fec-scheme">
+		<front>
+		<title>Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Scheme for FECFRAME</title>
+			<author initials="V" surname="Roca" fullname="Vincent Roca"> <organization /> </author>
+			<date month="May" year="2018" />
+		</front>
+		<seriesInfo name='Work in' value='Progress' />
+		<seriesInfo name='Transport Area Working Group (TSVWG)' value='draft-ietf-tsvwg-rlc-fec-scheme (Work in Progress)' />
+	</reference>
+
+	<reference anchor="Coding4QUIC" target="https://tools.ietf.org/html/draft-swett-nwcrg-coding-for-quic">
+		<front>
+		<title>Coding for QUIC</title>
+			<author initials="I" surname="Swett" fullname="Ian Swett"> <organization /> </author>
+			<author initials="M-J." surname="Montpetit" fullname="Marie-Jose Montpetit"> <organization /> </author>
+			<author initials="V" surname="Roca" fullname="Vincent Roca"> <organization /> </author>
+			<date month="June" year="2018" />
+		</front>
+		<seriesInfo name='Work in' value='Progress' />
+		<seriesInfo name='NWCRG' value='draft-swett-nwcrg-coding-for-quic (Work in Progress)' />
+	</reference>
+
+ 	</references>
+
+	<references title="Informative References">
+	<!-- ====================== -->
+
+	<reference anchor="nc-taxonomy" target="https://datatracker.ietf.org/doc/draft-irtf-nwcrg-network-coding-taxonomy/">
+		<front>
+			<title>Taxonomy of Coding Techniques for Efficient Network Communications</title>
+			<author initials="V." surname="Roca et al.">
+			<organization>INRIA</organization>
+			</author>
+			<date year="2018" month="March"/>
+		</front>
+		<seriesInfo name="Internet-Draft" value="draft-irtf-nwcrg-network-coding-taxonomy (Work in Progress)"/>
+	</reference>
+
+
+   </references>
+
+</back>
+
+</rfc>

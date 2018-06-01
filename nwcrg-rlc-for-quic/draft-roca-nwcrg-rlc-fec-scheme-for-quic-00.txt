@@ -1,0 +1,336 @@
+
+
+
+
+nwcrg                                                            V. Roca
+Internet-Draft                                                     INRIA
+Intended status: Informational                                  I. Swett
+Expires: December 3, 2018                                         Google
+                                                          M-J. Montpetit
+                                                          Triangle Video
+                                                            June 1, 2018
+
+
+Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC)
+                            Schemes for QUIC
+              draft-roca-nwcrg-rlc-fec-scheme-for-quic-00
+
+Abstract
+
+   This document specifies Sliding Window Random Linear Code (RLC)
+   Forward Erasure Correction (FEC) Schemes for the QUIC transport
+   protocol, in order to recover from packet losses.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on December 3, 2018.
+
+Copyright Notice
+
+   Copyright (c) 2018 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+
+
+
+Roca, et al.            Expires December 3, 2018                [Page 1]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
+
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Definitions and Abbreviations . . . . . . . . . . . . . . . .   3
+   3.  Procedures  . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   4.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a
+       Single QUIC Stream  . . . . . . . . . . . . . . . . . . . . .   3
+     4.1.  Formats and Codes . . . . . . . . . . . . . . . . . . . .   3
+       4.1.1.  FEC Framework Configuration Information . . . . . . .   4
+         4.1.1.1.  FEC Encoding ID . . . . . . . . . . . . . . . . .   4
+         4.1.1.2.  FEC Scheme-Specific Information . . . . . . . . .   4
+       4.1.2.  Repair FEC Payload ID . . . . . . . . . . . . . . . .   4
+       4.1.3.  Additional Procedures . . . . . . . . . . . . . . . .   4
+     4.2.  FEC Code Specification  . . . . . . . . . . . . . . . . .   4
+       4.2.1.  Encoding Side . . . . . . . . . . . . . . . . . . . .   4
+       4.2.2.  Decoding Side . . . . . . . . . . . . . . . . . . . .   4
+   5.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting
+       Several QUIC Streams  . . . . . . . . . . . . . . . . . . . .   4
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
+   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   4
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .   5
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   5
+
+1.  Introduction
+
+   QUIC [QUIC-transport] is a new transport that aims at improving
+   network performance by enabling out of order delivery, partial
+   reliability, and methods of recovery besides retransmission, while
+   also improving security.  This document specifies FEC schemes for
+   Sliding Window Random Linear Code (RLC) [RLC] to recover from lost
+   packets within a single QUIC stream or across several QUIC streams,
+   compliant with the FEC coding framework for QUIC [Coding4QUIC].
+
+   The ability to add FEC coding in QUIC may be beneficial in several
+   situations:
+
+   o  for a robust transmission of latency sensitive traffic, for
+      instance real-time flows, since it enables to recover packet
+      losses independently of the round trip time;
+
+
+
+
+
+
+Roca, et al.            Expires December 3, 2018                [Page 2]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
+
+   o  for the transmission of contents to a large set of QUIC reception
+      endpoints, since the same repair frame may help recovering several
+      different packet losses at different receivers;
+
+   o  for multipath communications, since repair traffic adds diversity.
+
+2.  Definitions and Abbreviations
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119].
+
+   Terms and definitions that apply to coding are available in
+   [nc-taxonomy].  More specifically, this document uses the following
+   definitions:
+
+   Packet versus Symbol:  a Packet is the unit of data that is exchanged
+      over the network while a Symbol is the unit of data that is
+      manipulated during the encoding and decoding operations
+
+   Source Symbol:  a unit of data originating from the source that is
+      used as input to encoding operations
+
+   Repair Symbol:  a unit of data that is the result of a coding
+      operation
+
+   This document uses the following abbreviations:
+
+   E: size of an encoding symbol (i.e., source or repair symbol),
+      assumed fixed (in bytes)
+
+3.  Procedures
+
+   This section introduces the procedures that are used by these FEC
+   Schemes.
+
+4.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single
+    QUIC Stream
+
+   This fully-specified FEC Scheme defines the Sliding Window Random
+   Linear Codes (RLC) over GF(2^^8).
+
+4.1.  Formats and Codes
+
+
+
+
+
+
+
+
+Roca, et al.            Expires December 3, 2018                [Page 3]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
+
+4.1.1.  FEC Framework Configuration Information
+
+4.1.1.1.  FEC Encoding ID
+
+4.1.1.2.  FEC Scheme-Specific Information
+
+4.1.2.  Repair FEC Payload ID
+
+4.1.3.  Additional Procedures
+
+4.2.  FEC Code Specification
+
+4.2.1.  Encoding Side
+
+4.2.2.  Decoding Side
+
+5.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting Several
+    QUIC Streams
+
+   This section focusses on the general case where FEC protection is
+   globally applied across two or more QUIC streams.
+
+6.  Security Considerations
+
+   TBD
+
+7.  IANA Considerations
+
+   TBD
+
+8.  Acknowledgments
+
+   TBD
+
+9.  References
+
+9.1.  Normative References
+
+   [Coding4QUIC]
+              Swett, I., Montpetit, M-J., and V. Roca, "Coding for
+              QUIC", Work in Progress, NWCRG draft-swett-nwcrg-coding-
+              for-quic (Work in Progress), June 2018,
+              <https://tools.ietf.org/html/draft-swett-nwcrg-coding-for-
+              quic>.
+
+
+
+
+
+
+
+Roca, et al.            Expires December 3, 2018                [Page 4]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
+
+   [QUIC-transport]
+              Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
+              Multiplexed and Secure Transport", draft-ietf-quic-
+              transport-12 (work in progress), May 2018,
+              <https://datatracker.ietf.org/doc/draft-ietf-quic-
+              transport/>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, DOI 10.17487/
+              RFC2119, March 1997,
+              <http://www.rfc-editor.org/info/rfc2119>.
+
+   [RLC]      Roca, V., "Sliding Window Random Linear Code (RLC) Forward
+              Erasure Correction (FEC) Scheme for FECFRAME", Work in
+              Progress, Transport Area Working Group (TSVWG) draft-ietf-
+              tsvwg-rlc-fec-scheme (Work in Progress), May 2018,
+              <https://tools.ietf.org/html/draft-ietf-tsvwg-rlc-fec-
+              scheme>.
+
+9.2.  Informative References
+
+   [nc-taxonomy]
+              Roca et al., V., "Taxonomy of Coding Techniques for
+              Efficient Network Communications", draft-irtf-nwcrg-
+              network-coding-taxonomy (Work in Progress) (work in
+              progress), March 2018, <https://datatracker.ietf.org/doc/
+              draft-irtf-nwcrg-network-coding-taxonomy/>.
+
+Authors' Addresses
+
+   Vincent Roca
+   INRIA
+   Univ. Grenoble Alpes
+   France
+
+   Email: vincent.roca@inria.fr
+
+
+   Ian Swett
+   Google
+   Cambridge, MA
+   US
+
+   Email: ianswett@google.com
+
+
+
+
+
+
+
+Roca, et al.            Expires December 3, 2018                [Page 5]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
+
+   Marie-Jose Montpetit
+   Triangle Video
+   Boston, MA
+   US
+
+   Email: marie@mjmontpetit.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Roca, et al.            Expires December 3, 2018                [Page 6]
