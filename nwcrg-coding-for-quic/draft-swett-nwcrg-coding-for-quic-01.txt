@@ -84,11 +84,11 @@ Table of Contents
    4.  FEC Scheme Negotiation in QUIC  . . . . . . . . . . . . . . .   6
      4.1.  FEC Scheme Selection Process  . . . . . . . . . . . . . .   7
      4.2.  FEC Scheme Configuration Information  . . . . . . . . . .   7
-   5.  Procedures when Protecting a Single QUIC Stream . . . . . . .   7
+   5.  Procedures when Protecting a Single QUIC Stream . . . . . . .   8
      5.1.  Application data, STREAM Frame data and Source Symbols  .   8
      5.2.  Signaling Considerations within STREAM and REPAIR Frames    9
      5.3.  Management of Silent Periods and End of Stream  . . . . .  10
-   6.  Procedures when Protecting Several QUIC Streams . . . . . . .  10
+   6.  Procedures when Protecting Several QUIC Streams . . . . . . .  11
      6.1.  Application data, STREAM Frame data and Source Symbols  .  11
      6.2.  Block or Encoding Window Management . . . . . . . . . . .  11
      6.3.  Signaling Considerations within STREAM and REPAIR Frames   12
@@ -97,7 +97,7 @@ Table of Contents
    9.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  13
    10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  13
      10.1.  Normative References . . . . . . . . . . . . . . . . . .  13
-     10.2.  Informative References . . . . . . . . . . . . . . . . .  13
+     10.2.  Informative References . . . . . . . . . . . . . . . . .  14
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  14
 
 1.  Introduction
@@ -351,18 +351,18 @@ Internet-Draft               Coding for QUIC                   June 2018
 
 4.1.  FEC Scheme Selection Process
 
-   Let us focus on the FEC Scheme selection process between the QUIC
-   transmission and reception endpoints.  Figure Figure 1 illustrates
-   the principle whe a QUIC reception endpoint initiates the exchange.
+   Let us consider the FEC Scheme selection process between the QUIC
+   endpoints.  Figure 1 illustrates the principle when a QUIC reception
+   endpoint initiates the exchange.
 
    QUIC sender                                       QUIC receiver
          < - - - - - - - - - - - - - - - - - - - - - -
-                  supported_fec_scheme_16b{FS1_Encoding_ID | other}
                   supported_fec_scheme_32b{FS1_Encoding_ID | other}
+                  supported_fec_scheme_64b{FS1_Encoding_ID | other}
 
    choose FEC Scheme "FS1"
          - - - - - - - - - - - - - - - - - - - - - - >
-     supported_fec_scheme_16b{FS1_Encoding_ID | other}
+     supported_fec_scheme_32b{FS1_Encoding_ID | other}
 
     Figure 1: Example FEC Scheme selection process, during the initial
                                negotiation.
@@ -370,21 +370,21 @@ Internet-Draft               Coding for QUIC                   June 2018
    The supported_fec_scheme_16b and supported_fec_scheme_32b are two new
    TransportParameterId to be added to the "Table 7: Initial QUIC
    Transport Parameters Entries" Section 13.1, of [QUIC-transport].  The
-   supported_fec_scheme_16b contains a 16-bit data field to carry opaque
-   16-bit value, while the supported_fec_scheme_32b contains a 32-bit
-   data field to carry opaque 32-bit value (see Section 4.2).
+   supported_fec_scheme_32b contains a 32-bit data field to carry opaque
+   32-bit value, while the supported_fec_scheme_64b contains a 64-bit
+   data field to carry opaque 64-bit value (see Section 4.2).
 
 4.2.  FEC Scheme Configuration Information
 
    Let us now focus on the communication of configuration information
    specific to the selected FEC Scheme.  In Figure 1, the
-   supported_fec_scheme_16b{FS1_Encoding_ID} contains a field meant to
-   carry the...
+   supported_fec_scheme_32b{FS1_Encoding_ID} contains a field meant to
+   carry the FEC Encoding ID of the FEC Scheme selected plus addditional
+   configuration information if any.  If a 32 bit opaque field is not
+   sufficient, the supported_fec_scheme_64b can be used instead and
+   proposes a 64 bit opaque field.
 
-5.  Procedures when Protecting a Single QUIC Stream
 
-   This section focusses on the simple case where FEC protection is
-   applied to a single QUIC stream.  We consider a unidirectional data
 
 
 
@@ -394,6 +394,10 @@ Swett, et al.           Expires December 10, 2018               [Page 7]
 Internet-Draft               Coding for QUIC                   June 2018
 
 
+5.  Procedures when Protecting a Single QUIC Stream
+
+   This section focusses on the simple case where FEC protection is
+   applied to a single QUIC stream.  We consider a unidirectional data
    flow between a QUIC sending endpoint and one (or more) QUIC reception
    endpoints.
 
@@ -438,10 +442,6 @@ Internet-Draft               Coding for QUIC                   June 2018
    consider that the source symbol is available for FEC decoding
    operations.  The choice of an appropriate value for E may depend on
    the use case (in particular on the nature of application data).  A
-   reasonably small value reduces the probability that a source symbol
-   straddles two or more STREAM frames, a situation that is considered
-   as potentially harmful (the unit of control, the source symbol, and
-   unit of transmission, the frame, are not aligned).  However an overly
 
 
 
@@ -450,6 +450,10 @@ Swett, et al.           Expires December 10, 2018               [Page 8]
 Internet-Draft               Coding for QUIC                   June 2018
 
 
+   reasonably small value reduces the probability that a source symbol
+   straddles two or more STREAM frames, a situation that is considered
+   as potentially harmful (the unit of control, the source symbol, and
+   unit of transmission, the frame, are not aligned).  However an overly
    small value also increases processing complexity (FEC encoding and
    decoding are performed over a larger linear system) so there is an
    incentive to use a larger value.  An appropriate balance should be
@@ -494,10 +498,6 @@ Internet-Draft               Coding for QUIC                   June 2018
 
    As explained above, source data is transmitted without any
    modification, which provides backward compatibility.  This is
-   advantage in situations where the same QUIC stream is delivered to
-   several QUIC reception endpoints (multicast): it may be appropriate
-   to select a given FEC Scheme even if it is known that a subset of the
-   QUIC reception endpoints do not support it.
 
 
 
@@ -505,6 +505,11 @@ Swett, et al.           Expires December 10, 2018               [Page 9]
 
 Internet-Draft               Coding for QUIC                   June 2018
 
+
+   advantage in situations where the same QUIC stream is delivered to
+   several QUIC reception endpoints (multicast): it may be appropriate
+   to select a given FEC Scheme even if it is known that a subset of the
+   QUIC reception endpoints do not support it.
 
    Editor's notes:
 
@@ -545,14 +550,9 @@ Internet-Draft               Coding for QUIC                   June 2018
        use of zero padding for transitory silent periods may add a lot
        of specification and implementation complexity...
 
-6.  Procedures when Protecting Several QUIC Streams
 
-   This section focusses on the general case where FEC protection is
-   globally applied across two or more QUIC streams.
 
-   Editor's notes:  It is not clear whether this use-case is needed.  It
-       adds specification and implementation complexity that need to be
-       balanced with the expected benefits.
+
 
 
 
@@ -561,6 +561,15 @@ Swett, et al.           Expires December 10, 2018              [Page 10]
 
 Internet-Draft               Coding for QUIC                   June 2018
 
+
+6.  Procedures when Protecting Several QUIC Streams
+
+   This section focusses on the general case where FEC protection is
+   globally applied across two or more QUIC streams.
+
+   Editor's notes:  It is not clear whether this use-case is needed.  It
+       adds specification and implementation complexity that need to be
+       balanced with the expected benefits.
 
        *  Receiver: A first complexity comes from the requirement to
           identify to which stream a decoded source symbol belongs to.
@@ -601,15 +610,6 @@ Internet-Draft               Coding for QUIC                   June 2018
    window FEC code), the source symbols to consider of each stream are
    appended.  All the relevant source symbols of the first stream are
    appended, followed by all the source symbols of the second stream,
-   etc.  These sequences do not follow any timing consideration in order
-   to simplify signaling.
-
-   Figure 3 illustrates, in case of a Sliding Window FEC Scheme, an
-   encoding window with source symbols belonging to two streams, of
-   Stream ID 120 and 51 respectively.
-
-
-
 
 
 
@@ -617,6 +617,13 @@ Swett, et al.           Expires December 10, 2018              [Page 11]
 
 Internet-Draft               Coding for QUIC                   June 2018
 
+
+   etc.  These sequences do not follow any timing consideration in order
+   to simplify signaling.
+
+   Figure 3 illustrates, in case of a Sliding Window FEC Scheme, an
+   encoding window with source symbols belonging to two streams, of
+   Stream ID 120 and 51 respectively.
 
    < ----------- Stream ID 120 ---------- > < --- Stream ID 51 --- >
    +-------+-------+-------+-------+-------+-------+-------+-------+
@@ -658,13 +665,6 @@ Internet-Draft               Coding for QUIC                   June 2018
    o  the actual number of streams considered (the maximum number is
       known after the negotiation step, but if one of the streams
       remains silent for some time, it may not contribute during
-      encoding and therefore be absent from the block or encoding
-      window);
-
-   o  for each stream concerned, its Stream ID, the offset of the first
-      source symbol considered as well as the length, i.e., the number
-      of bytes considered.
-
 
 
 
@@ -673,6 +673,13 @@ Swett, et al.           Expires December 10, 2018              [Page 12]
 
 Internet-Draft               Coding for QUIC                   June 2018
 
+
+      encoding and therefore be absent from the block or encoding
+      window);
+
+   o  for each stream concerned, its Stream ID, the offset of the first
+      source symbol considered as well as the length, i.e., the number
+      of bytes considered.
 
    This approach does not enable to keep track of the source symbol
    ordering across streams, but enables a non ambiguous description of
@@ -713,13 +720,6 @@ Internet-Draft               Coding for QUIC                   June 2018
               RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
 
-10.2.  Informative References
-
-   [RFC5510]  Lacan, J., Roca, V., Peltotalo, J., and S. Peltotalo,
-              "Reed-Solomon Forward Error Correction (FEC) Schemes", RFC
-              5510, DOI 10.17487/RFC5510, April 2009, <https://www.rfc-
-              editor.org/info/rfc5510>.
-
 
 
 
@@ -729,6 +729,13 @@ Swett, et al.           Expires December 10, 2018              [Page 13]
 
 Internet-Draft               Coding for QUIC                   June 2018
 
+
+10.2.  Informative References
+
+   [RFC5510]  Lacan, J., Roca, V., Peltotalo, J., and S. Peltotalo,
+              "Reed-Solomon Forward Error Correction (FEC) Schemes", RFC
+              5510, DOI 10.17487/RFC5510, April 2009, <https://www.rfc-
+              editor.org/info/rfc5510>.
 
    [RLC]      Roca, V., "Sliding Window Random Linear Code (RLC) Forward
               Erasure Correction (FEC) Scheme for FECFRAME", Work in
@@ -768,13 +775,6 @@ Authors' Addresses
    France
 
    Email: vincent.roca@inria.fr
-
-
-
-
-
-
-
 
 
 

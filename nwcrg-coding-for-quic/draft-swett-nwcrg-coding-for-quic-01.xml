@@ -330,28 +330,28 @@ FEC Scheme negotiation has two goals:
 		<!-- ====================== -->
 
 <t>
-Let us focus on the FEC Scheme selection process between the QUIC transmission and reception endpoints.
-Figure <xref target="fig_fec_scheme_selection"/> illustrates the principle whe a QUIC reception endpoint initiates the exchange.
+Let us consider the FEC Scheme selection process between the QUIC endpoints.
+<xref target="fig_fec_scheme_selection"/> illustrates the principle when a QUIC reception endpoint initiates the exchange.
 </t>
 
 <figure anchor="fig_fec_scheme_selection" title="Example FEC Scheme selection process, during the initial negotiation.">
         <artwork><![CDATA[
 QUIC sender                                       QUIC receiver
       < - - - - - - - - - - - - - - - - - - - - - -
-               supported_fec_scheme_16b{FS1_Encoding_ID | other}
                supported_fec_scheme_32b{FS1_Encoding_ID | other}
+               supported_fec_scheme_64b{FS1_Encoding_ID | other}
 
 choose FEC Scheme "FS1"
       - - - - - - - - - - - - - - - - - - - - - - >
-  supported_fec_scheme_16b{FS1_Encoding_ID | other}
+  supported_fec_scheme_32b{FS1_Encoding_ID | other}
 ]]></artwork>
 </figure>
 
 <t>
 The supported_fec_scheme_16b and supported_fec_scheme_32b are two new TransportParameterId to be added to the
 "Table 7: Initial QUIC Transport Parameters Entries" Section 13.1, of <xref target="QUIC-transport"/>.
-The supported_fec_scheme_16b contains a 16-bit data field to carry opaque 16-bit value, while
-the supported_fec_scheme_32b contains a 32-bit data field to carry opaque 32-bit value
+The supported_fec_scheme_32b contains a 32-bit data field to carry opaque 32-bit value, while
+the supported_fec_scheme_64b contains a 64-bit data field to carry opaque 64-bit value
 (see <xref target="sec_fec_scheme_config_info"/>).
 </t>
 
@@ -362,8 +362,10 @@ the supported_fec_scheme_32b contains a 32-bit data field to carry opaque 32-bit
 
 <t>
 Let us now focus on the communication of configuration information specific to the selected FEC Scheme.
-In <xref target="fig_fec_scheme_selection"/>, the supported_fec_scheme_16b{FS1_Encoding_ID} contains a field
-meant to carry the...
+In <xref target="fig_fec_scheme_selection"/>, the supported_fec_scheme_32b{FS1_Encoding_ID} contains a field
+meant to carry the FEC Encoding ID of the FEC Scheme selected plus addditional configuration information if any.
+If a 32 bit opaque field is not sufficient, the supported_fec_scheme_64b can be used instead and proposes a 64 bit
+opaque field.
 </t>
 
 		</section>
