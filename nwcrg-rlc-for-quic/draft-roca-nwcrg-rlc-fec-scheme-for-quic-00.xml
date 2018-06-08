@@ -319,12 +319,26 @@ More precisely, the REPAIR frame format is composed of the following fields (<xr
 	<section title="FEC Code Specification">
 	<!-- ================ -->
 
+<t>
+This RLC FEC Scheme relies on the FEC code specification defined in <xref target="RLC"/>.
+</t>
+
 		<section title="Encoding Side">
 		<!-- ================ -->
+
+<t>
+<xref target="RLC"/> high level description of a Sliding Window RLC encoder also applies here to this FEC Scheme.
+</t>
+
 		</section>
 
 		<section title="Decoding Side">
 		<!-- ================ -->
+
+<t>
+<xref target="RLC"/> high level description of a Sliding Window RLC decoder also applies here to this FEC Scheme.
+</t>
+
 		</section>
 
 	</section>
@@ -339,6 +353,10 @@ More precisely, the REPAIR frame format is composed of the following fields (<xr
 
 <t>
 This section focusses on the general case where FEC protection is globally applied across two or more QUIC streams.
+</t>
+
+<t>
+TODO
 </t>
 
 </section>
@@ -436,7 +454,7 @@ This document registers two values in the "QUIC FEC Encoding IDs" registry as fo
 			<author initials="V." surname="Roca et al.">
 			<organization>INRIA</organization>
 			</author>
-			<date year="2018" month="March"/>
+			<date year="2018" month="June"/>
 		</front>
 		<seriesInfo name="Internet-Draft" value="draft-irtf-nwcrg-network-coding-taxonomy (Work in Progress)"/>
 	</reference>

@@ -5,10 +5,10 @@
 nwcrg                                                            V. Roca
 Internet-Draft                                                     INRIA
 Intended status: Informational                                  I. Swett
-Expires: December 3, 2018                                         Google
+Expires: December 10, 2018                                        Google
                                                           M-J. Montpetit
                                                           Triangle Video
-                                                            June 1, 2018
+                                                            June 8, 2018
 
 
 Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC)
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 3, 2018.
+   This Internet-Draft will expire on December 10, 2018.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Roca, et al.            Expires December 3, 2018                [Page 1]
+Roca, et al.            Expires December 10, 2018               [Page 1]
 
 Internet-Draft                RLC for QUIC                     June 2018
 
@@ -80,12 +80,12 @@ Table of Contents
        4.2.2.  Decoding Side . . . . . . . . . . . . . . . . . . . .   6
    5.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting
        Several QUIC Streams  . . . . . . . . . . . . . . . . . . . .   6
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
    8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   7
    9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
      9.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .   7
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .   8
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
 1.  Introduction
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Roca, et al.            Expires December 3, 2018                [Page 2]
+Roca, et al.            Expires December 10, 2018               [Page 2]
 
 Internet-Draft                RLC for QUIC                     June 2018
 
@@ -165,7 +165,7 @@ Internet-Draft                RLC for QUIC                     June 2018
 
 
 
-Roca, et al.            Expires December 3, 2018                [Page 3]
+Roca, et al.            Expires December 10, 2018               [Page 3]
 
 Internet-Draft                RLC for QUIC                     June 2018
 
@@ -221,7 +221,7 @@ Internet-Draft                RLC for QUIC                     June 2018
 
 
 
-Roca, et al.            Expires December 3, 2018                [Page 4]
+Roca, et al.            Expires December 10, 2018               [Page 4]
 
 Internet-Draft                RLC for QUIC                     June 2018
 
@@ -277,7 +277,7 @@ Internet-Draft                RLC for QUIC                     June 2018
 
 
 
-Roca, et al.            Expires December 3, 2018                [Page 5]
+Roca, et al.            Expires December 10, 2018               [Page 5]
 
 Internet-Draft                RLC for QUIC                     June 2018
 
@@ -311,15 +311,32 @@ Internet-Draft                RLC for QUIC                     June 2018
 
 4.2.  FEC Code Specification
 
+   This RLC FEC Scheme relies on the FEC code specification defined in
+   [RLC].
+
 4.2.1.  Encoding Side
 
+   [RLC] high level description of a Sliding Window RLC encoder also
+   applies here to this FEC Scheme.
+
 4.2.2.  Decoding Side
+
+   [RLC] high level description of a Sliding Window RLC decoder also
+   applies here to this FEC Scheme.
 
 5.  Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting Several
     QUIC Streams
 
    This section focusses on the general case where FEC protection is
    globally applied across two or more QUIC streams.
+
+
+
+
+Roca, et al.            Expires December 10, 2018               [Page 6]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
 
 6.  Security Considerations
 
@@ -329,14 +346,6 @@ Internet-Draft                RLC for QUIC                     June 2018
 
    This document registers two values in the "QUIC FEC Encoding IDs"
    registry as follows:
-
-
-
-
-Roca, et al.            Expires December 3, 2018                [Page 6]
-
-Internet-Draft                RLC for QUIC                     June 2018
-
 
    o  XXXX refers to the Sliding Window Random Linear Codes (RLC) over
       GF(2^^8) FEC Scheme for a Single QUIC Stream, as defined in
@@ -373,6 +382,18 @@ Internet-Draft                RLC for QUIC                     June 2018
               RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
 
+
+
+
+
+
+
+
+Roca, et al.            Expires December 10, 2018               [Page 7]
+
+Internet-Draft                RLC for QUIC                     June 2018
+
+
    [RLC]      Roca, V., "Sliding Window Random Linear Code (RLC) Forward
               Erasure Correction (FEC) Scheme for FECFRAME", Work in
               Progress, Transport Area Working Group (TSVWG) draft-ietf-
@@ -381,18 +402,6 @@ Internet-Draft                RLC for QUIC                     June 2018
               scheme>.
 
 9.2.  Informative References
-
-
-
-
-
-
-
-
-Roca, et al.            Expires December 3, 2018                [Page 7]
-
-Internet-Draft                RLC for QUIC                     June 2018
-
 
    [nc-taxonomy]
               Roca et al., V., "Taxonomy of Coding Techniques for
@@ -436,13 +445,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-
-
-
-
-Roca, et al.            Expires December 3, 2018                [Page 8]
+Roca, et al.            Expires December 10, 2018               [Page 8]

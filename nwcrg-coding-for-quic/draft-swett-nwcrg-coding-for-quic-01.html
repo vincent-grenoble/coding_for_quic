@@ -384,6 +384,8 @@
 <link href="#rfc.section.3.5" rel="Chapter" title="3.5 FEC Protection at the Stream Level"/>
 <link href="#rfc.section.3.6" rel="Chapter" title="3.6 About Gaps in the Set of Source Symbols Considered During Encoding"/>
 <link href="#rfc.section.4" rel="Chapter" title="4 FEC Scheme Negotiation in QUIC"/>
+<link href="#rfc.section.4.1" rel="Chapter" title="4.1 FEC Scheme Selection Process"/>
+<link href="#rfc.section.4.2" rel="Chapter" title="4.2 FEC Scheme Configuration Information"/>
 <link href="#rfc.section.5" rel="Chapter" title="5 Procedures when Protecting a Single QUIC Stream"/>
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 Application data, STREAM Frame data and Source Symbols"/>
 <link href="#rfc.section.5.2" rel="Chapter" title="5.2 Signaling Considerations within STREAM and REPAIR Frames"/>
@@ -406,7 +408,7 @@
 
   <meta name="dct.creator" content="Swett, I., Montpetit, M-J., and V. Roca" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-swett-nwcrg-coding-for-quic-01" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-5-31" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-6-8" />
   <meta name="dct.abstract" content="This document focusses on the integration of FEC coding in the QUIC transport protocol, in order to recover from packet losses.  This document does not specify any FEC code but defines mechanisms to negotiate and integrate FEC Schemes in QUIC.  By using proactive loss recovery, it is expected to improve QUIC performance in sessions impacted by packet losses.  More precisely it is expected to improve QUIC performance with real-time sessions (since FEC coding makes packet loss recovery insensitive to the round trip time), with multicast sessions (since the same repair packet can recover several different losses at several receivers), and with multipath sessions (since repair packets add diversity).  " />
   <meta name="description" content="This document focusses on the integration of FEC coding in the QUIC transport protocol, in order to recover from packet losses.  This document does not specify any FEC code but defines mechanisms to negotiate and integrate FEC Schemes in QUIC.  By using proactive loss recovery, it is expected to improve QUIC performance in sessions impacted by packet losses.  More precisely it is expected to improve QUIC performance with real-time sessions (since FEC coding makes packet loss recovery insensitive to the round trip time), with multicast sessions (since the same repair packet can recover several different losses at several receivers), and with multipath sessions (since repair packets add diversity).  " />
 
@@ -430,7 +432,7 @@
   <td class="right">M-J. Montpetit</td>
 </tr>
 <tr>
-  <td class="left">Expires: December 2, 2018</td>
+  <td class="left">Expires: December 10, 2018</td>
   <td class="right">Triangle Video</td>
 </tr>
 <tr>
@@ -443,7 +445,7 @@
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">May 31, 2018</td>
+  <td class="right">June 8, 2018</td>
 </tr>
 
     	
@@ -463,7 +465,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 2, 2018.</p>
+<p>This Internet-Draft will expire on December 10, 2018.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -485,6 +487,8 @@
 <li>3.5.   <a href="#rfc.section.3.5">FEC Protection at the Stream Level</a></li>
 <li>3.6.   <a href="#rfc.section.3.6">About Gaps in the Set of Source Symbols Considered During Encoding</a></li>
 <li>4.   <a href="#rfc.section.4">FEC Scheme Negotiation in QUIC</a></li>
+<li>4.1.   <a href="#rfc.section.4.1">FEC Scheme Selection Process</a></li>
+<li>4.2.   <a href="#rfc.section.4.2">FEC Scheme Configuration Information</a></li>
 <li>5.   <a href="#rfc.section.5">Procedures when Protecting a Single QUIC Stream</a></li>
 <li>5.1.   <a href="#rfc.section.5.1">Application data, STREAM Frame data and Source Symbols</a></li>
 <li>5.2.   <a href="#rfc.section.5.2">Signaling Considerations within STREAM and REPAIR Frames</a></li>
@@ -567,11 +571,11 @@
 <p id="rfc.section.3.6.p.2">Supporting gaps can be motivated by the desire to reduce encoding and decoding complexity since there are fewer variables.  However this choice has major consequences in terms of signaling.  Indeed each repair symbol transmitted MUST be accompanied with enough information for the QUIC decoding endpoint to unambiguously identify the exact composition of the block or encoding window.  Without any gap, the identity of the first source symbol plus the number of symbols in the block or encoding window is sufficient.  With gaps, a more complex encoding needs to be used, perhaps similar to the encoding used for selective acknowledgments.  </p>
 <p id="rfc.section.3.6.p.3">Whether or not gaps are supported MUST be clarified in each FEC Scheme.  </p>
 <h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> FEC Scheme Negotiation in QUIC</h1>
-<p id="rfc.section.4.p.1">FEC Scheme negotiation has several goals: </p>
+<p id="rfc.section.4.p.1">FEC Scheme negotiation has two goals: </p>
 
 <ul>
   <li>Selecting a FEC Scheme (or FEC Schemes) that can be used by the QUIC transmission and reception endpoints.  This process requires an exchange between them;</li>
-  <li>Communicating a certain number of parameters that are not expected to change over the session lifetime.  For instance, this is the case of the symbol size parameter, E (in bytes), that needs either to be agreed between the endpoints, or chosen by the sender and communicated to the receiver(s);</li>
+  <li>Communicating a certain number of parameters, the "Configuration Information", that are not expected to change over the session lifetime.  For instance, this is the case of the symbol size parameter, E (in bytes), that needs either to be agreed between the endpoints, or chosen by the sender and communicated to the receiver(s);</li>
 </ul>
 
 <p> </p>
@@ -587,17 +591,35 @@
       <li>The present document only provides high level principles, the details are of course the responsibility of the FEC Scheme.</li>
       <li>In case negotiation is different when protecting a single versus several streams, this section may be moved to the respective sections.</li>
       <li>How does it work in case of a multicast session?</li>
+      <li>Do we negotiate here a FEC Scheme on a per-Stream basis (or group of Streams to be protected jointly)? Or do we negotiate a FEC Scheme on a QUIC session basis, therefore to be used for all the Streams that need FEC protection?</li>
     </ul>
   </dd>
 </dl>
 
 <p> </p>
+<h1 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> FEC Scheme Selection Process</h1>
+<p id="rfc.section.4.1.p.1">Let us focus on the FEC Scheme (or FEC Schemes) selection between the QUIC transmission and reception endpoints.  Figure <a href="#fig_fec_scheme_selection">Figure 1</a> illustrates the principle whe a QUIC reception endpoint initiates the exchange.  </p>
+<div id="rfc.figure.1"/>
+<div id="fig_fec_scheme_selection"/>
+<pre>
+QUIC sender                                       QUIC receiver
+      &lt; - - - - - - - - - - - - - - - - - - - - - -
+               supported_fec_scheme{REED-SOLOMON_Encoding_ID}
+               supported_fec_scheme{ANOTHER_FEC_Encoding_ID}
+
+choose Reed-Solomon
+      - - - - - - - - - - - - - - - - - - - - - - &gt;
+  supported_fec_scheme{REED-SOLOMON_Encoding_ID}
+</pre>
+<p class="figure">Figure 1: Example FEC Scheme selection process, during the initial negotiation.</p>
+<p id="rfc.section.4.1.p.2">The supported_fec_scheme is a new TransportParameterId to be added to the "Table 7: Initial QUIC Transport Parameters Entries" Section 13.1, of <a href="#QUIC-transport">[QUIC-transport]</a>.  </p>
+<h1 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a> FEC Scheme Configuration Information</h1>
 <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> Procedures when Protecting a Single QUIC Stream</h1>
 <p id="rfc.section.5.p.1">This section focusses on the simple case where FEC protection is applied to a single QUIC stream.  We consider a unidirectional data flow between a QUIC sending endpoint and one (or more) QUIC reception endpoints.  </p>
 <h1 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> Application data, STREAM Frame data and Source Symbols</h1>
 <p id="rfc.section.5.1.p.1">Application data is kept in a transmission buffer at a QUIC sending endpoint, and sent within STREAM frames.  Each STREAM frame that carries data contains an Offset field that indicates the offset within the stream of the first byte of the Stream Data field, as well as a Length field that indicates the number of bytes contained in the Stream Data field.  Upon receiving a STREAM frame, using the Offset and Length fields, a QUIC reception endpoint can easily store data in its reception buffer.  But since a QUIC Packet may be lost during transmission, the reception buffer may have gaps.  </p>
-<p><a href="#fig_frame_2_ss_mapping">Figure 1</a> illustrates how source symbols are mapped to the QUIC transmission or reception buffers (same principle on either side).  Since any source (and repair) symbol is of fixed size (E bytes) for a given stream, since QUIC guaranties that the first byte in the stream has an offset of 0, the position of each source symbol is known by both ends.  </p>
-<div id="rfc.figure.1"/>
+<p><a href="#fig_frame_2_ss_mapping">Figure 2</a> illustrates how source symbols are mapped to the QUIC transmission or reception buffers (same principle on either side).  Since any source (and repair) symbol is of fixed size (E bytes) for a given stream, since QUIC guaranties that the first byte in the stream has an offset of 0, the position of each source symbol is known by both ends.  </p>
+<div id="rfc.figure.2"/>
 <div id="fig_frame_2_ss_mapping"/>
 <pre>
  &lt; -E- &gt; &lt; -E- &gt; &lt; -E- &gt; &lt; -E- &gt;
@@ -609,7 +631,7 @@
 | Frame 4 - &gt;&lt; -F5- &gt;|             source symbols 8, 9 and 10
 +-------+-------+----+             (incomplete)
 </pre>
-<p class="figure">Figure 1: Example of source symbol mapping, when the E value is relatively small.</p>
+<p class="figure">Figure 2: Example of source symbol mapping, when the E value is relatively small.</p>
 <p id="rfc.section.5.1.p.3">Any value for E is possible, from a single byte to several hundreds or thousands of bytes.  In general, the source symbols are not aligned with data chunks sent in the STREAM frames.  A given STREAM frame may carry all the bytes of a given source symbol.  But when a source symbol straddles two or more (e.g., if E is large compared to usual frame size) STREAM frames, a proper reception of these two (or more) STREAM frames is needed for a QUIC reception endpoint to consider that the source symbol is available for FEC decoding operations.  The choice of an appropriate value for E may depend on the use case (in particular on the nature of application data).  A reasonably small value reduces the probability that a source symbol straddles two or more STREAM frames, a situation that is considered as potentially harmful (the unit of control, the source symbol, and unit of transmission, the frame, are not aligned).  However an overly small value also increases processing complexity (FEC encoding and decoding are performed over a larger linear system) so there is an incentive to use a larger value.  An appropriate balance should be found, and this choice is considered as out of scope for this document.  </p>
 <h1 id="rfc.section.5.2"><a href="#rfc.section.5.2">5.2.</a> Signaling Considerations within STREAM and REPAIR Frames</h1>
 <p id="rfc.section.5.2.p.1">Once the initial negotiation succeeded and an appropriate FEC Scheme has been chosen between the QUIC endpoints, data is exchanged as follows.  Source data is transmitted within STREAM frames, as would happen without any FEC based loss recovery mechanism (in particular without considering source symbols boundaries).  Repair data, computed during FEC encoding, on the opposite, is sent within a dedicated REPAIR frame type, chosen within the type range dedicated to "Extension Frames".  In both cases, the same Stream ID is used since both flows relate to the same stream.  </p>
@@ -664,12 +686,12 @@
 
 <p> </p>
 <h1 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a> Application data, STREAM Frame data and Source Symbols</h1>
-<p id="rfc.section.6.1.p.1">Within each stream, the source symbols MUST be defined as in the simple case of a single stream.  <a href="#fig_frame_2_ss_mapping">Figure 1</a> remains valid.  </p>
+<p id="rfc.section.6.1.p.1">Within each stream, the source symbols MUST be defined as in the simple case of a single stream.  <a href="#fig_frame_2_ss_mapping">Figure 2</a> remains valid.  </p>
 <h1 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a> Block or Encoding Window Management</h1>
 <p id="rfc.section.6.2.p.1">The details of how to create the block or encoding window are specific to the FEC Scheme.  A possible approach is the following.  </p>
 <p id="rfc.section.6.2.p.2">When creating the block (block FEC code) or encoding window (sliding window FEC code), the source symbols to consider of each stream are appended.  All the relevant source symbols of the first stream are appended, followed by all the source symbols of the second stream, etc.  These sequences do not follow any timing consideration in order to simplify signaling.  </p>
-<p><a href="#fig_ew_across_2_streams">Figure 2</a> illustrates, in case of a Sliding Window FEC Scheme, an encoding window with source symbols belonging to two streams, of Stream ID 120 and 51 respectively.  </p>
-<div id="rfc.figure.2"/>
+<p><a href="#fig_ew_across_2_streams">Figure 3</a> illustrates, in case of a Sliding Window FEC Scheme, an encoding window with source symbols belonging to two streams, of Stream ID 120 and 51 respectively.  </p>
+<div id="rfc.figure.3"/>
 <div id="fig_ew_across_2_streams"/>
 <pre>
 &lt; ----------- Stream ID 120 ---------- &gt; &lt; --- Stream ID 51 --- &gt;
@@ -680,7 +702,7 @@
  |                                       |
 offset = 0x42f0, length = 5*E       offset = 0x0f24, length = 3*E
 </pre>
-<p class="figure">Figure 2: Example of encoding window of a Sliding Window FEC Scheme and FEC protection across two streams.</p>
+<p class="figure">Figure 3: Example of encoding window of a Sliding Window FEC Scheme and FEC protection across two streams.</p>
 <h1 id="rfc.section.6.3"><a href="#rfc.section.6.3">6.3.</a> Signaling Considerations within STREAM and REPAIR Frames</h1>
 <p id="rfc.section.6.3.p.1">Source data on each stream is transmitted within STREAM frames, as would happen without any FEC based loss recovery mechanism.  </p>
 <p id="rfc.section.6.3.p.2">Repair symbols, generated during FEC encoding as a linear combination of source symbols that belong to one or more of the streams, are transmitted within REPAIR frames.  Each REPAIR frame can be associated to any of the input streams it protects, and therefore associated to any of the associated Stream IDs.  </p>
