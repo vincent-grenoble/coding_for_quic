@@ -85,7 +85,7 @@ Table of Contents
      4.1.  FEC Scheme Selection Process  . . . . . . . . . . . . . .   7
      4.2.  FEC Scheme Configuration Information  . . . . . . . . . .   7
    5.  Procedures when Protecting a Single QUIC Stream . . . . . . .   7
-     5.1.  Application data, STREAM Frame data and Source Symbols  .   7
+     5.1.  Application data, STREAM Frame data and Source Symbols  .   8
      5.2.  Signaling Considerations within STREAM and REPAIR Frames    9
      5.3.  Management of Silent Periods and End of Stream  . . . . .  10
    6.  Procedures when Protecting Several QUIC Streams . . . . . . .  10
@@ -351,41 +351,41 @@ Internet-Draft               Coding for QUIC                   June 2018
 
 4.1.  FEC Scheme Selection Process
 
-   Let us focus on the FEC Scheme (or FEC Schemes) selection between the
-   QUIC transmission and reception endpoints.  Figure Figure 1
-   illustrates the principle whe a QUIC reception endpoint initiates the
-   exchange.
+   Let us focus on the FEC Scheme selection process between the QUIC
+   transmission and reception endpoints.  Figure Figure 1 illustrates
+   the principle whe a QUIC reception endpoint initiates the exchange.
 
    QUIC sender                                       QUIC receiver
          < - - - - - - - - - - - - - - - - - - - - - -
-                  supported_fec_scheme{REED-SOLOMON_Encoding_ID}
-                  supported_fec_scheme{ANOTHER_FEC_Encoding_ID}
+                  supported_fec_scheme_16b{FS1_Encoding_ID | other}
+                  supported_fec_scheme_32b{FS1_Encoding_ID | other}
 
-   choose Reed-Solomon
+   choose FEC Scheme "FS1"
          - - - - - - - - - - - - - - - - - - - - - - >
-     supported_fec_scheme{REED-SOLOMON_Encoding_ID}
+     supported_fec_scheme_16b{FS1_Encoding_ID | other}
 
     Figure 1: Example FEC Scheme selection process, during the initial
                                negotiation.
 
-   The supported_fec_scheme is a new TransportParameterId to be added to
-   the "Table 7: Initial QUIC Transport Parameters Entries"
-   Section 13.1, of [QUIC-transport].
+   The supported_fec_scheme_16b and supported_fec_scheme_32b are two new
+   TransportParameterId to be added to the "Table 7: Initial QUIC
+   Transport Parameters Entries" Section 13.1, of [QUIC-transport].  The
+   supported_fec_scheme_16b contains a 16-bit data field to carry opaque
+   16-bit value, while the supported_fec_scheme_32b contains a 32-bit
+   data field to carry opaque 32-bit value (see Section 4.2).
 
 4.2.  FEC Scheme Configuration Information
+
+   Let us now focus on the communication of configuration information
+   specific to the selected FEC Scheme.  In Figure 1, the
+   supported_fec_scheme_16b{FS1_Encoding_ID} contains a field meant to
+   carry the...
 
 5.  Procedures when Protecting a Single QUIC Stream
 
    This section focusses on the simple case where FEC protection is
    applied to a single QUIC stream.  We consider a unidirectional data
-   flow between a QUIC sending endpoint and one (or more) QUIC reception
-   endpoints.
 
-5.1.  Application data, STREAM Frame data and Source Symbols
-
-   Application data is kept in a transmission buffer at a QUIC sending
-   endpoint, and sent within STREAM frames.  Each STREAM frame that
-   carries data contains an Offset field that indicates the offset
 
 
 
@@ -394,6 +394,14 @@ Swett, et al.           Expires December 10, 2018               [Page 7]
 Internet-Draft               Coding for QUIC                   June 2018
 
 
+   flow between a QUIC sending endpoint and one (or more) QUIC reception
+   endpoints.
+
+5.1.  Application data, STREAM Frame data and Source Symbols
+
+   Application data is kept in a transmission buffer at a QUIC sending
+   endpoint, and sent within STREAM frames.  Each STREAM frame that
+   carries data contains an Offset field that indicates the offset
    within the stream of the first byte of the Stream Data field, as well
    as a Length field that indicates the number of bytes contained in the
    Stream Data field.  Upon receiving a STREAM frame, using the Offset
@@ -434,14 +442,6 @@ Internet-Draft               Coding for QUIC                   June 2018
    straddles two or more STREAM frames, a situation that is considered
    as potentially harmful (the unit of control, the source symbol, and
    unit of transmission, the frame, are not aligned).  However an overly
-   small value also increases processing complexity (FEC encoding and
-   decoding are performed over a larger linear system) so there is an
-   incentive to use a larger value.  An appropriate balance should be
-   found, and this choice is considered as out of scope for this
-   document.
-
-
-
 
 
 
@@ -449,6 +449,12 @@ Swett, et al.           Expires December 10, 2018               [Page 8]
 
 Internet-Draft               Coding for QUIC                   June 2018
 
+
+   small value also increases processing complexity (FEC encoding and
+   decoding are performed over a larger linear system) so there is an
+   incentive to use a larger value.  An appropriate balance should be
+   found, and this choice is considered as out of scope for this
+   document.
 
 5.2.  Signaling Considerations within STREAM and REPAIR Frames
 
@@ -493,18 +499,18 @@ Internet-Draft               Coding for QUIC                   June 2018
    to select a given FEC Scheme even if it is known that a subset of the
    QUIC reception endpoints do not support it.
 
-   Editor's notes:
-
-       *  This I-D proposes to define a single generic REPAIR frame
-          type, but an alternative could be to have a one-to-one mapping
-          between a REPAIR frame type and a specific FEC Scheme.
-
 
 
 Swett, et al.           Expires December 10, 2018               [Page 9]
 
 Internet-Draft               Coding for QUIC                   June 2018
 
+
+   Editor's notes:
+
+       *  This I-D proposes to define a single generic REPAIR frame
+          type, but an alternative could be to have a one-to-one mapping
+          between a REPAIR frame type and a specific FEC Scheme.
 
        *  The use of frame type within the Extension Frames range for
           REPAIR frames is meant to facilitate experimentations.  If the
@@ -548,12 +554,6 @@ Internet-Draft               Coding for QUIC                   June 2018
        adds specification and implementation complexity that need to be
        balanced with the expected benefits.
 
-       *  Receiver: A first complexity comes from the requirement to
-          identify to which stream a decoded source symbol belongs to.
-          This is also one of the main difficulty for FECFRAME (both
-          with block and sliding window codes) which required to
-          distinguish an ADU (submitted by the application) from an ADUI
-
 
 
 
@@ -562,6 +562,11 @@ Swett, et al.           Expires December 10, 2018              [Page 10]
 Internet-Draft               Coding for QUIC                   June 2018
 
 
+       *  Receiver: A first complexity comes from the requirement to
+          identify to which stream a decoded source symbol belongs to.
+          This is also one of the main difficulty for FECFRAME (both
+          with block and sliding window codes) which required to
+          distinguish an ADU (submitted by the application) from an ADUI
           (the same ADU plus an additional FlowID among other things).
           Do we want this level of complexity?
 
@@ -602,11 +607,6 @@ Internet-Draft               Coding for QUIC                   June 2018
    Figure 3 illustrates, in case of a Sliding Window FEC Scheme, an
    encoding window with source symbols belonging to two streams, of
    Stream ID 120 and 51 respectively.
-
-
-
-
-
 
 
 

@@ -598,22 +598,23 @@
 
 <p> </p>
 <h1 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> FEC Scheme Selection Process</h1>
-<p id="rfc.section.4.1.p.1">Let us focus on the FEC Scheme (or FEC Schemes) selection between the QUIC transmission and reception endpoints.  Figure <a href="#fig_fec_scheme_selection">Figure 1</a> illustrates the principle whe a QUIC reception endpoint initiates the exchange.  </p>
+<p id="rfc.section.4.1.p.1">Let us focus on the FEC Scheme selection process between the QUIC transmission and reception endpoints.  Figure <a href="#fig_fec_scheme_selection">Figure 1</a> illustrates the principle whe a QUIC reception endpoint initiates the exchange.  </p>
 <div id="rfc.figure.1"/>
 <div id="fig_fec_scheme_selection"/>
 <pre>
 QUIC sender                                       QUIC receiver
       &lt; - - - - - - - - - - - - - - - - - - - - - -
-               supported_fec_scheme{REED-SOLOMON_Encoding_ID}
-               supported_fec_scheme{ANOTHER_FEC_Encoding_ID}
+               supported_fec_scheme_16b{FS1_Encoding_ID | other}
+               supported_fec_scheme_32b{FS1_Encoding_ID | other}
 
-choose Reed-Solomon
+choose FEC Scheme "FS1"
       - - - - - - - - - - - - - - - - - - - - - - &gt;
-  supported_fec_scheme{REED-SOLOMON_Encoding_ID}
+  supported_fec_scheme_16b{FS1_Encoding_ID | other}
 </pre>
 <p class="figure">Figure 1: Example FEC Scheme selection process, during the initial negotiation.</p>
-<p id="rfc.section.4.1.p.2">The supported_fec_scheme is a new TransportParameterId to be added to the "Table 7: Initial QUIC Transport Parameters Entries" Section 13.1, of <a href="#QUIC-transport">[QUIC-transport]</a>.  </p>
-<h1 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a> FEC Scheme Configuration Information</h1>
+<p id="rfc.section.4.1.p.2">The supported_fec_scheme_16b and supported_fec_scheme_32b are two new TransportParameterId to be added to the "Table 7: Initial QUIC Transport Parameters Entries" Section 13.1, of <a href="#QUIC-transport">[QUIC-transport]</a>.  The supported_fec_scheme_16b contains a 16-bit data field to carry opaque 16-bit value, while the supported_fec_scheme_32b contains a 32-bit data field to carry opaque 32-bit value (see <a href="#sec_fec_scheme_config_info">Section 4.2</a>).  </p>
+<h1 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a> <a href="#sec_fec_scheme_config_info" id="sec_fec_scheme_config_info">FEC Scheme Configuration Information</a></h1>
+<p id="rfc.section.4.2.p.1">Let us now focus on the communication of configuration information specific to the selected FEC Scheme.  In <a href="#fig_fec_scheme_selection">Figure 1</a>, the supported_fec_scheme_16b{FS1_Encoding_ID} contains a field meant to carry the...  </p>
 <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> Procedures when Protecting a Single QUIC Stream</h1>
 <p id="rfc.section.5.p.1">This section focusses on the simple case where FEC protection is applied to a single QUIC stream.  We consider a unidirectional data flow between a QUIC sending endpoint and one (or more) QUIC reception endpoints.  </p>
 <h1 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> Application data, STREAM Frame data and Source Symbols</h1>

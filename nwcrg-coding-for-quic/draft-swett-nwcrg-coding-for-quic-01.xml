@@ -352,18 +352,18 @@ The supported_fec_scheme_16b and supported_fec_scheme_32b are two new TransportP
 "Table 7: Initial QUIC Transport Parameters Entries" Section 13.1, of <xref target="QUIC-transport"/>.
 The supported_fec_scheme_16b contains a 16-bit data field to carry opaque 16-bit value, while
 the supported_fec_scheme_32b contains a 32-bit data field to carry opaque 32-bit value
-(see <xref target="sec_fec_scheme_config_info"/>.
+(see <xref target="sec_fec_scheme_config_info"/>).
 </t>
 
 		</section>
 
-		<section target="sec_fec_scheme_config_info" title="FEC Scheme Configuration Information">
+		<section anchor="sec_fec_scheme_config_info" title="FEC Scheme Configuration Information">
 		<!-- ====================== -->
 
 <t>
 Let us now focus on the communication of configuration information specific to the selected FEC Scheme.
 In <xref target="fig_fec_scheme_selection"/>, the supported_fec_scheme_16b{FS1_Encoding_ID} contains a field
-meant to carry the
+meant to carry the...
 </t>
 
 		</section>
