@@ -408,7 +408,7 @@
 
   <meta name="dct.creator" content="Swett, I., Montpetit, M-J., and V. Roca" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-swett-nwcrg-coding-for-quic-01" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-6-22" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-7-17" />
   <meta name="dct.abstract" content="This document focusses on the integration of FEC coding in the QUIC transport protocol, in order to recover from packet losses.  This document does not specify any FEC code but defines mechanisms to negotiate and integrate FEC Schemes in QUIC.  By using proactive loss recovery, it is expected to improve QUIC performance in sessions impacted by packet losses.  More precisely it is expected to improve QUIC performance with real-time sessions (since FEC coding makes packet loss recovery insensitive to the round trip time), with multicast sessions (since the same repair packet can recover several different losses at several receivers), and with multipath sessions (since repair packets add diversity).  " />
   <meta name="description" content="This document focusses on the integration of FEC coding in the QUIC transport protocol, in order to recover from packet losses.  This document does not specify any FEC code but defines mechanisms to negotiate and integrate FEC Schemes in QUIC.  By using proactive loss recovery, it is expected to improve QUIC performance in sessions impacted by packet losses.  More precisely it is expected to improve QUIC performance with real-time sessions (since FEC coding makes packet loss recovery insensitive to the round trip time), with multicast sessions (since the same repair packet can recover several different losses at several receivers), and with multipath sessions (since repair packets add diversity).  " />
 
@@ -432,7 +432,7 @@
   <td class="right">M-J. Montpetit</td>
 </tr>
 <tr>
-  <td class="left">Expires: December 24, 2018</td>
+  <td class="left">Expires: January 18, 2019</td>
   <td class="right">Triangle Video</td>
 </tr>
 <tr>
@@ -445,7 +445,7 @@
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">June 22, 2018</td>
+  <td class="right">July 17, 2018</td>
 </tr>
 
     	
@@ -465,7 +465,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 24, 2018.</p>
+<p>This Internet-Draft will expire on January 18, 2019.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -636,15 +636,15 @@ choose FEC Scheme "FS1"
 <p id="rfc.section.5.1.p.3">Any value for E is possible, from a single byte to several hundreds or thousands of bytes.  In general, the source symbols are not aligned with data chunks sent in the STREAM frames.  A given STREAM frame may carry all the bytes of a given source symbol.  But when a source symbol straddles two or more (e.g., if E is large compared to usual frame size) STREAM frames, a proper reception of these two (or more) STREAM frames is needed for a QUIC reception endpoint to consider that the source symbol is available for FEC decoding operations.  The choice of an appropriate value for E may depend on the use case (in particular on the nature of application data).  A reasonably small value reduces the probability that a source symbol straddles two or more STREAM frames, a situation that is considered as potentially harmful (the unit of control, the source symbol, and unit of transmission, the frame, are not aligned).  However an overly small value also increases processing complexity (FEC encoding and decoding are performed over a larger linear system) so there is an incentive to use a larger value.  An appropriate balance should be found, and this choice is considered as out of scope for this document.  </p>
 <h1 id="rfc.section.5.2"><a href="#rfc.section.5.2">5.2.</a> Signaling Considerations within STREAM and REPAIR Frames</h1>
 <p id="rfc.section.5.2.p.1">Once the initial negotiation succeeded and an appropriate FEC Scheme has been chosen between the QUIC endpoints, data is exchanged as follows.  Source data is transmitted within STREAM frames, as would happen without any FEC based loss recovery mechanism (in particular without considering source symbols boundaries).  Repair data, computed during FEC encoding, on the opposite, is sent within a dedicated REPAIR frame type, chosen within the type range dedicated to "Extension Frames".  In both cases, the same Stream ID is used since both flows relate to the same stream.  </p>
-<p id="rfc.section.5.2.p.2">The REPAIR frame format is FEC Scheme dependent.  The document specifying a FEC Scheme to be used with QUIC MUST define the REPAIR frame format, among other things.  The REPAIR frame MUST carry enough information for a QUIC reception endpoint to understand exactly how this repair symbol(s) has(ve) been generated.  It implies that each REPAIR symbol MUST communicate the block (with block codes) or encoding window (with Sliding Window codes) composition.  This MAY be achieved by communicating in case there is no gap in the source symbol set (see XXX): </p>
+<p id="rfc.section.5.2.p.2">The REPAIR frame format is FEC Scheme dependent.  The document specifying a FEC Scheme to be used with QUIC MUST define the REPAIR frame format, among other things.  The REPAIR frame MUST carry enough information for a QUIC reception endpoint to understand exactly how this repair symbol(s) has(ve) been generated.  It implies that each REPAIR symbol MUST communicate the block (with block codes) or encoding window (with Sliding Window codes) composition.  When there is no gap in the source symbol set, this MAY be achieved by communicating: </p>
 
 <ul>
   <li>the offset of the first source symbol of the block or encoding window;</li>
   <li>the number of source symbols in the block or encoding window, which can be either a number of symbols or a number of bytes since symbols are of fixed size, E.</li>
 </ul>
 
-<p> Note that unlike FEC Schemes for FLUTE/ALC, NORM, and FECFRAME, here there is no notion of Encoding Symbol Id (ESI), an identifier managed in a sequential manner to identify source and repair symbols.  The use of an offset within the stream, with the guaranty that no wrapping to zero can occur, provides an alternative mechanism to identify any source symbol.  </p>
-<p id="rfc.section.5.2.p.3">As explained above, source data is transmitted without any modification, which provides backward compatibility.  This is advantage in situations where the same QUIC stream is delivered to several QUIC reception endpoints (multicast): it may be appropriate to select a given FEC Scheme even if it is known that a subset of the QUIC reception endpoints do not support it.  </p>
+<p> Note that unlike FEC Schemes for FLUTE/ALC, NORM, and FECFRAME, here there is no notion of Encoding Symbol Id (ESI).  The use of an offset within the stream, with the guaranty that no wrapping to zero can occur, provides an alternative mechanism to identify any source symbol.  </p>
+<p id="rfc.section.5.2.p.3">As explained above, source data is transmitted without any modification, which provides backward compatibility.  This is an advantage in situations where the same QUIC stream is simultaneously delivered to several QUIC reception endpoints (multicast): it enables a given FEC Scheme to be used even if a subset of the QUIC reception endpoints do not support it.  </p>
 <p/>
 
 <dl>

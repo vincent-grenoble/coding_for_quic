@@ -440,18 +440,18 @@ The REPAIR frame format is FEC Scheme dependent.
 The document specifying a FEC Scheme to be used with QUIC MUST define the REPAIR frame format, among other things.
 The REPAIR frame MUST carry enough information for a QUIC reception endpoint to understand exactly how this repair symbol(s) has(ve) been generated.
 It implies that each REPAIR symbol MUST communicate the block (with block codes) or encoding window (with Sliding Window codes) composition.
-This MAY be achieved by communicating in case there is no gap in the source symbol set (see XXX):
+When there is no gap in the source symbol set, this MAY be achieved by communicating:
 <list style="symbols">
 	<t>the offset of the first source symbol of the block or encoding window;</t>
 	<t>the number of source symbols in the block or encoding window, which can be either a number of symbols or a number of bytes since symbols are of fixed size, E.</t>
 </list>
-Note that unlike FEC Schemes for FLUTE/ALC, NORM, and FECFRAME, here there is no notion of Encoding Symbol Id (ESI), an identifier managed in a sequential manner to identify source and repair symbols.
+Note that unlike FEC Schemes for FLUTE/ALC, NORM, and FECFRAME, here there is no notion of Encoding Symbol Id (ESI).
 The use of an offset within the stream, with the guaranty that no wrapping to zero can occur, provides an alternative mechanism to identify any source symbol.
 </t>
 
 <t>
 As explained above, source data is transmitted without any modification, which provides backward compatibility.
-This is advantage in situations where the same QUIC stream is delivered to several QUIC reception endpoints (multicast): it may be appropriate to select a given FEC Scheme even if it is known that a subset of the QUIC reception endpoints do not support it.
+This is an advantage in situations where the same QUIC stream is simultaneously delivered to several QUIC reception endpoints (multicast): it enables a given FEC Scheme to be used even if a subset of the QUIC reception endpoints do not support it.
 </t>
 
 <t>
