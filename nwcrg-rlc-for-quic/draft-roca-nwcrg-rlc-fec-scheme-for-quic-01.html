@@ -1,0 +1,738 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head profile="http://www.w3.org/2006/03/hcard http://dublincore.org/documents/2008/08/04/dc-html/">
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+
+  <title>Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Schemes for QUIC</title>
+
+  <style type="text/css" title="Xml2Rfc (sans serif)">
+  /*<![CDATA[*/
+	  a {
+	  text-decoration: none;
+	  }
+      /* info code from SantaKlauss at http://www.madaboutstyle.com/tooltip2.html */
+      a.info {
+          /* This is the key. */
+          position: relative;
+          z-index: 24;
+          text-decoration: none;
+      }
+      a.info:hover {
+          z-index: 25;
+          color: #FFF; background-color: #900;
+      }
+      a.info span { display: none; }
+      a.info:hover span.info {
+          /* The span will display just on :hover state. */
+          display: block;
+          position: absolute;
+          font-size: smaller;
+          top: 2em; left: -5em; width: 15em;
+          padding: 2px; border: 1px solid #333;
+          color: #900; background-color: #EEE;
+          text-align: left;
+      }
+	  a.smpl {
+	  color: black;
+	  }
+	  a:hover {
+	  text-decoration: underline;
+	  }
+	  a:active {
+	  text-decoration: underline;
+	  }
+	  address {
+	  margin-top: 1em;
+	  margin-left: 2em;
+	  font-style: normal;
+	  }
+	  body {
+	  color: black;
+	  font-family: verdana, helvetica, arial, sans-serif;
+	  font-size: 10pt;
+	  max-width: 55em;
+	  
+	  }
+	  cite {
+	  font-style: normal;
+	  }
+	  dd {
+	  margin-right: 2em;
+	  }
+	  dl {
+	  margin-left: 2em;
+	  }
+	
+	  ul.empty {
+	  list-style-type: none;
+	  }
+	  ul.empty li {
+	  margin-top: .5em;
+	  }
+	  dl p {
+	  margin-left: 0em;
+	  }
+	  dt {
+	  margin-top: .5em;
+	  }
+	  h1 {
+	  font-size: 14pt;
+	  line-height: 21pt;
+	  page-break-after: avoid;
+	  }
+	  h1.np {
+	  page-break-before: always;
+	  }
+	  h1 a {
+	  color: #333333;
+	  }
+	  h2 {
+	  font-size: 12pt;
+	  line-height: 15pt;
+	  page-break-after: avoid;
+	  }
+	  h3, h4, h5, h6 {
+	  font-size: 10pt;
+	  page-break-after: avoid;
+	  }
+	  h2 a, h3 a, h4 a, h5 a, h6 a {
+	  color: black;
+	  }
+	  img {
+	  margin-left: 3em;
+	  }
+	  li {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol p {
+	  margin-left: 0em;
+	  }
+	  p {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  pre {
+	  margin-left: 3em;
+	  background-color: lightyellow;
+	  padding: .25em;
+	  }
+	  pre.text2 {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f0f0f0;
+	  width: 69em;
+	  }
+	  pre.inline {
+	  background-color: white;
+	  padding: 0em;
+	  }
+	  pre.text {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  width: 69em;
+	  }
+	  pre.drawing {
+	  border-style: solid;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  padding: 2em;
+	  }
+	  table {
+	  margin-left: 2em;
+	  }
+	  table.tt {
+	  vertical-align: top;
+	  }
+	  table.full {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.headers {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.tt td {
+	  vertical-align: top;
+	  }
+	  table.full td {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.tt th {
+	  vertical-align: top;
+	  }
+	  table.full th {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.headers th {
+	  border-style: none none inset none;
+	  border-width: 1px;
+	  }
+	  table.left {
+	  margin-right: auto;
+	  }
+	  table.right {
+	  margin-left: auto;
+	  }
+	  table.center {
+	  margin-left: auto;
+	  margin-right: auto;
+	  }
+	  caption {
+	  caption-side: bottom;
+	  font-weight: bold;
+	  font-size: 9pt;
+	  margin-top: .5em;
+	  }
+	
+	  table.header {
+	  border-spacing: 1px;
+	  width: 95%;
+	  font-size: 10pt;
+	  color: white;
+	  }
+	  td.top {
+	  vertical-align: top;
+	  }
+	  td.topnowrap {
+	  vertical-align: top;
+	  white-space: nowrap; 
+	  }
+	  table.header td {
+	  background-color: gray;
+	  width: 50%;
+	  }
+	  table.header a {
+	  color: white;
+	  }
+	  td.reference {
+	  vertical-align: top;
+	  white-space: nowrap;
+	  padding-right: 1em;
+	  }
+	  thead {
+	  display:table-header-group;
+	  }
+	  ul.toc, ul.toc ul {
+	  list-style: none;
+	  margin-left: 1.5em;
+	  margin-right: 0em;
+	  padding-left: 0em;
+	  }
+	  ul.toc li {
+	  line-height: 150%;
+	  font-weight: bold;
+	  font-size: 10pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  ul.toc li li {
+	  line-height: normal;
+	  font-weight: normal;
+	  font-size: 9pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  li.excluded {
+	  font-size: 0pt;
+	  }
+	  ul p {
+	  margin-left: 0em;
+	  }
+	
+	  .comment {
+	  background-color: yellow;
+	  }
+	  .center {
+	  text-align: center;
+	  }
+	  .error {
+	  color: red;
+	  font-style: italic;
+	  font-weight: bold;
+	  }
+	  .figure {
+	  font-weight: bold;
+	  text-align: center;
+	  font-size: 9pt;
+	  }
+	  .filename {
+	  color: #333333;
+	  font-weight: bold;
+	  font-size: 12pt;
+	  line-height: 21pt;
+	  text-align: center;
+	  }
+	  .fn {
+	  font-weight: bold;
+	  }
+	  .hidden {
+	  display: none;
+	  }
+	  .left {
+	  text-align: left;
+	  }
+	  .right {
+	  text-align: right;
+	  }
+	  .title {
+	  color: #990000;
+	  font-size: 18pt;
+	  line-height: 18pt;
+	  font-weight: bold;
+	  text-align: center;
+	  margin-top: 36pt;
+	  }
+	  .vcardline {
+	  display: block;
+	  }
+	  .warning {
+	  font-size: 14pt;
+	  background-color: yellow;
+	  }
+	
+	
+	  @media print {
+	  .noprint {
+		display: none;
+	  }
+	
+	  a {
+		color: black;
+		text-decoration: none;
+	  }
+	
+	  table.header {
+		width: 90%;
+	  }
+	
+	  td.header {
+		width: 50%;
+		color: black;
+		background-color: white;
+		vertical-align: top;
+		font-size: 12pt;
+	  }
+	
+	  ul.toc a::after {
+		content: leader('.') target-counter(attr(href), page);
+	  }
+	
+	  ul.ind li li a {
+		content: target-counter(attr(href), page);
+	  }
+	
+	  .print2col {
+		column-count: 2;
+		-moz-column-count: 2;
+		column-fill: auto;
+	  }
+	  }
+	
+	  @page {
+	  @top-left {
+		   content: "Internet-Draft"; 
+	  } 
+	  @top-right {
+		   content: "December 2010"; 
+	  } 
+	  @top-center {
+		   content: "Abbreviated Title";
+	  } 
+	  @bottom-left {
+		   content: "Doe"; 
+	  } 
+	  @bottom-center {
+		   content: "Expires June 2011"; 
+	  } 
+	  @bottom-right {
+		   content: "[Page " counter(page) "]"; 
+	  } 
+	  }
+	
+	  @page:first { 
+		@top-left {
+		  content: normal;
+		}
+		@top-right {
+		  content: normal;
+		}
+		@top-center {
+		  content: normal;
+		}
+	  }
+  /*]]>*/
+  </style>
+
+  <link href="#rfc.toc" rel="Contents"/>
+<link href="#rfc.section.1" rel="Chapter" title="1 Introduction"/>
+<link href="#rfc.section.2" rel="Chapter" title="2 Definitions and Abbreviations"/>
+<link href="#rfc.section.3" rel="Chapter" title="3 Procedures"/>
+<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Source Symbols Mapping"/>
+<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Pseudo-Random Number Generator (PRNG)"/>
+<link href="#rfc.section.3.3" rel="Chapter" title="3.3 Coding Coefficients Generation Function"/>
+<link href="#rfc.section.4" rel="Chapter" title="4 Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single QUIC Stream"/>
+<link href="#rfc.section.4.1" rel="Chapter" title="4.1 Formats and Codes"/>
+<link href="#rfc.section.4.1.1" rel="Chapter" title="4.1.1 Configuration Information"/>
+<link href="#rfc.section.4.1.2" rel="Chapter" title="4.1.2 REPAIR Frame Format"/>
+<link href="#rfc.section.4.1.3" rel="Chapter" title="4.1.3 Additional Procedures"/>
+<link href="#rfc.section.4.2" rel="Chapter" title="4.2 FEC Code Specification"/>
+<link href="#rfc.section.4.2.1" rel="Chapter" title="4.2.1 Encoding Side"/>
+<link href="#rfc.section.4.2.2" rel="Chapter" title="4.2.2 Decoding Side"/>
+<link href="#rfc.section.5" rel="Chapter" title="5 Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting Several QUIC Streams"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 Security Considerations"/>
+<link href="#rfc.section.7" rel="Chapter" title="7 IANA Considerations"/>
+<link href="#rfc.section.8" rel="Chapter" title="8 Acknowledgments"/>
+<link href="#rfc.references" rel="Chapter" title="9 References"/>
+<link href="#rfc.references.1" rel="Chapter" title="9.1 Normative References"/>
+<link href="#rfc.references.2" rel="Chapter" title="9.2 Informative References"/>
+<link href="#rfc.authors" rel="Chapter"/>
+
+
+  <meta name="generator" content="xml2rfc version 2.4.8 - http://tools.ietf.org/tools/xml2rfc" />
+  <link rel="schema.dct" href="http://purl.org/dc/terms/" />
+
+  <meta name="dct.creator" content="Roca, V., Swett, I., and M-J. Montpetit" />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-roca-nwcrg-rlc-fec-scheme-for-quic-01" />
+  <meta name="dct.issued" scheme="ISO8601" content="2019-2-4" />
+  <meta name="dct.abstract" content="This document specifies Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Schemes for the QUIC transport protocol, in order to recover from packet losses.  " />
+  <meta name="description" content="This document specifies Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Schemes for the QUIC transport protocol, in order to recover from packet losses.  " />
+
+</head>
+
+<body>
+
+  <table class="header">
+    <tbody>
+    
+    	<tr>
+  <td class="left">nwcrg</td>
+  <td class="right">V. Roca</td>
+</tr>
+<tr>
+  <td class="left">Internet-Draft</td>
+  <td class="right">INRIA</td>
+</tr>
+<tr>
+  <td class="left">Intended status: Informational</td>
+  <td class="right">I. Swett</td>
+</tr>
+<tr>
+  <td class="left">Expires: August 8, 2019</td>
+  <td class="right">Google</td>
+</tr>
+<tr>
+  <td class="left"></td>
+  <td class="right">M-J. Montpetit</td>
+</tr>
+<tr>
+  <td class="left"></td>
+  <td class="right">Triangle Video</td>
+</tr>
+<tr>
+  <td class="left"></td>
+  <td class="right">February 4, 2019</td>
+</tr>
+
+    	
+    </tbody>
+  </table>
+
+  <p class="title">Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Schemes for QUIC<br />
+  <span class="filename">draft-roca-nwcrg-rlc-fec-scheme-for-quic-01</span></p>
+  
+  <h1 id="rfc.abstract">
+  <a href="#rfc.abstract">Abstract</a>
+</h1>
+<p>This document specifies Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Schemes for the QUIC transport protocol, in order to recover from packet losses.  </p>
+<h1 id="rfc.status">
+  <a href="#rfc.status">Status of This Memo</a>
+</h1>
+<p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
+<p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
+<p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
+<p>This Internet-Draft will expire on August 8, 2019.</p>
+<h1 id="rfc.copyrightnotice">
+  <a href="#rfc.copyrightnotice">Copyright Notice</a>
+</h1>
+<p>Copyright (c) 2019 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
+<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
+
+  
+  <hr class="noprint" />
+  <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
+  <ul class="toc">
+
+  	<li>1.   <a href="#rfc.section.1">Introduction</a></li>
+<li>2.   <a href="#rfc.section.2">Definitions and Abbreviations</a></li>
+<li>3.   <a href="#rfc.section.3">Procedures</a></li>
+<li>3.1.   <a href="#rfc.section.3.1">Source Symbols Mapping</a></li>
+<li>3.2.   <a href="#rfc.section.3.2">Pseudo-Random Number Generator (PRNG)</a></li>
+<li>3.3.   <a href="#rfc.section.3.3">Coding Coefficients Generation Function</a></li>
+<li>4.   <a href="#rfc.section.4">Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single QUIC Stream</a></li>
+<li>4.1.   <a href="#rfc.section.4.1">Formats and Codes</a></li>
+<li>4.1.1.   <a href="#rfc.section.4.1.1">Configuration Information</a></li>
+<li>4.1.2.   <a href="#rfc.section.4.1.2">REPAIR Frame Format</a></li>
+<li>4.1.3.   <a href="#rfc.section.4.1.3">Additional Procedures</a></li>
+<li>4.2.   <a href="#rfc.section.4.2">FEC Code Specification</a></li>
+<li>4.2.1.   <a href="#rfc.section.4.2.1">Encoding Side</a></li>
+<li>4.2.2.   <a href="#rfc.section.4.2.2">Decoding Side</a></li>
+<li>5.   <a href="#rfc.section.5">Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting Several QUIC Streams</a></li>
+<li>6.   <a href="#rfc.section.6">Security Considerations</a></li>
+<li>7.   <a href="#rfc.section.7">IANA Considerations</a></li>
+<li>8.   <a href="#rfc.section.8">Acknowledgments</a></li>
+<li>9.   <a href="#rfc.references">References</a></li>
+<li>9.1.   <a href="#rfc.references.1">Normative References</a></li>
+<li>9.2.   <a href="#rfc.references.2">Informative References</a></li>
+<li><a href="#rfc.authors">Authors' Addresses</a></li>
+
+
+  </ul>
+
+  <h1 id="rfc.section.1"><a href="#rfc.section.1">1.</a> Introduction</h1>
+<p id="rfc.section.1.p.1">QUIC <a href="#QUIC-transport">[QUIC-transport]</a> is a new transport that aims at improving network performance by enabling out of order delivery, partial reliability, and methods of recovery besides retransmission, while also improving security.  This document specifies FEC schemes for Sliding Window Random Linear Code (RLC) <a href="#RLC">[RLC]</a> to recover from lost packets within a single QUIC stream or across several QUIC streams, compliant with the FEC coding framework for QUIC <a href="#Coding4QUIC">[Coding4QUIC]</a>.  </p>
+<p id="rfc.section.1.p.2">The ability to add FEC coding in QUIC may be beneficial in several situations: </p>
+
+<ul>
+  <li>for a robust transmission of latency sensitive traffic, for instance real-time flows, since it enables to recover packet losses independently of the round trip time;</li>
+  <li>for the transmission of contents to a large set of QUIC reception endpoints, since the same repair frame may help recovering several different packet losses at different receivers;</li>
+  <li>for multipath communications, since repair traffic adds diversity.</li>
+</ul>
+
+<p> </p>
+<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#definitionsAndAbbreviations" id="definitionsAndAbbreviations">Definitions and Abbreviations</a></h1>
+<p id="rfc.section.2.p.1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in <a href="#RFC2119">[RFC2119]</a>.  </p>
+<p id="rfc.section.2.p.2">Terms and definitions that apply to coding are available in <a href="#nc-taxonomy">[nc-taxonomy]</a>.  More specifically, this document uses the following definitions: </p>
+
+<dl>
+  <dt>Packet versus Symbol:</dt>
+  <dd style="margin-left: 8">a Packet is the unit of data that is exchanged over the network while a Symbol is the unit of data that is manipulated during the encoding and decoding operations</dd>
+  <dt>Source Symbol:</dt>
+  <dd style="margin-left: 8">a unit of data originating from the source that is used as input to encoding operations</dd>
+  <dt>Repair Symbol:</dt>
+  <dd style="margin-left: 8">a unit of data that is the result of a coding operation</dd>
+</dl>
+<p id="rfc.section.2.p.3">This document uses the following abbreviations: </p>
+
+<dl>
+  <dt>E:</dt>
+  <dd style="margin-left: 8">size of an encoding symbol (i.e., source or repair symbol), assumed fixed (in bytes)</dd>
+</dl>
+<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#CommonProcedures" id="CommonProcedures">Procedures</a></h1>
+<p id="rfc.section.3.p.1">This section introduces the procedures that are used by these FEC Schemes.  </p>
+<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> <a href="#CommonProc_adui_creation" id="CommonProc_adui_creation">Source Symbols Mapping</a></h1>
+<p id="rfc.section.3.1.p.1">The present FEC Scheme follows the source symbols mapping specified in <a href="#Coding4QUIC">[Coding4QUIC]</a>.  <a href="#fig_frame_2_ss_mapping">Figure 1</a> illustrates this mapping.  </p>
+<div id="rfc.figure.1"/>
+<div id="fig_frame_2_ss_mapping"/>
+<pre>
+ &lt; -E- &gt; &lt; -E- &gt; &lt; -E- &gt; &lt; -E- &gt;
++-------+-------+-------+-------+
+|&lt; -- Frame 1 -- &gt;&lt; ----- Frame |  source symbols 0, 1, 2, 3
++-------+-------+-------+-------+
+| 2 ----- &gt;&lt; --- Frame 3 -- &gt;&lt; -|  source symbols 4, 5, 6, 7
++-------+-------+----+--+-------+
+| Frame 4 - &gt;&lt; -F5- &gt;|             source symbols 8, 9 and 10
++-------+-------+----+             (incomplete)
+</pre>
+<p class="figure">Figure 1: Example of source symbol mapping, when the E value is relatively small.</p>
+<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#CommonProc_prng" id="CommonProc_prng">Pseudo-Random Number Generator (PRNG)</a></h1>
+<p id="rfc.section.3.2.p.1">The RLC FEC Schemes defined in this document rely on the TinyMT32 PRNG defined in <a href="#RLC">[RLC]</a>.  </p>
+<h1 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a> <a href="#CommonProc_coef_generation_func" id="CommonProc_coef_generation_func">Coding Coefficients Generation Function</a></h1>
+<p id="rfc.section.3.3.p.1">The coding coefficients, used during the encoding process, are generated at the RLC encoder by the generate_coding_coefficients() function each time a new repair symbol needs to be produced.  This specification uses the generate_coding_coefficients() defined in <a href="#RLC">[RLC]</a>.  </p>
+<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#rlc-single-stream" id="rlc-single-stream">Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting a Single QUIC Stream</a></h1>
+<p id="rfc.section.4.p.1">This fully-specified FEC Scheme defines the Sliding Window Random Linear Codes (RLC) over GF(2^^8) when protecting a single QUIC stream.  </p>
+<h1 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> Formats and Codes</h1>
+<h1 id="rfc.section.4.1.1"><a href="#rfc.section.4.1.1">4.1.1.</a> Configuration Information</h1>
+<p id="rfc.section.4.1.1.p.1">This section provides the RLC configuration information that needs to be shared during QUIC negotiation between the QUIC sender and receiver endpoints in order to synchronize them.  </p>
+<p/>
+
+<ul>
+  <li>FEC Encoding ID (8 bits): the value assigned to this fully specified FEC Scheme MUST be XXXX, as assigned by IANA (<a href="#iana">Section 7</a>).  This FEC Encoding ID is used during the QUIC negotiation to uniquely identify the RLC FEC Scheme for QUIC;</li>
+  <li>Encoding symbol size, E (in bytes) (16 bits): a non-negative integer that indicates the size of each source and repair symbol, in bytes.  This element is required both by the QUIC sender endpoint (RLC encoder) and the QUIC receiver endpoint(s) (RLC decoder).</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.4.1.1.p.3">TODO: specify exact format, with binary encoding, to be carried within the opaque 32-bit field during negotiation.  </p>
+<h1 id="rfc.section.4.1.2"><a href="#rfc.section.4.1.2">4.1.2.</a> REPAIR Frame Format</h1>
+<p id="rfc.section.4.1.2.p.1">The RLC FEC Scheme does not use any explicit Source FEC Payload ID, meaning that QUIC STREAM frame format is not modified.  </p>
+<p id="rfc.section.4.1.2.p.2">On the opposite, the RLC FEC Scheme requires QUIC REPAIR frames to convey enough information.  This section specifies the REPAIR frame format specific to the RLC FEC Scheme and a single QUIC stream.  Note that the notion of REPAIR frame format is equivalent to the notion of Repair FEC Payload ID in <a href="#RLC">[RLC]</a>.  </p>
+<div id="rfc.figure.2"/>
+<div id="fig_repair_frame_format_1_stream"/>
+<pre>
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                         Stream ID (i)                       ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|               [Offset of First Source Symbol in EW (i)]     ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                         [Length (i)]                        ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Repair_Key              |  DT   |NSS (# src symb in ew) |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Stream Data                          ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</pre>
+<p class="figure">Figure 2: REPAIR frame format when protecting a single QUIC stream.</p>
+<p id="rfc.section.4.1.2.p.3">More precisely, the REPAIR frame format is composed of the following fields (<a href="#fig_repair_frame_format_1_stream">Figure 2</a>): </p>
+
+<dl>
+  <dt>Stream ID (variable-size field):</dt>
+  <dd style="margin-left: 8">a variable-length integer indicating the stream ID of the stream. See <a href="#QUIC-transport">[QUIC-transport]</a>.  The Stream ID for an RLC REPAIR frame MUST be equal to the Stream ID used for the data stream it protects; </dd>
+  <dt>Offset of First Source Symbol in the Encoding Window (variable-size field):</dt>
+  <dd style="margin-left: 8">a variable-length integer specifying the byte offset in the stream for the first source symbol of the encoding window.</dd>
+  <dt>Length (variable-size field):</dt>
+  <dd style="margin-left: 8">a variable-length integer specifying the length of the Stream Data field in this REPAIR frame.  This length MUST be a non zero multiple of the source symbol size, E, since a REPAIR frame contains one or more repair symbols for this stream;</dd>
+  <dt>Repair_Key (16-bit field):</dt>
+  <dd style="margin-left: 8">this unsigned integer is used as a seed by the coefficient generation function (<a href="#CommonProc_coef_generation_func">Section 3.3</a>) in order to generate the desired number of coding coefficients.  When a FEC Repair Packet contains several repair symbols, this repair key value is that of the first repair symbol.  The remaining repair keys can be deduced by incrementing by 1 this value, up to a maximum value of 65535 after which it loops back to 0.  </dd>
+  <dt>Density Threshold for the coding coefficients, DT (4-bit field):</dt>
+  <dd style="margin-left: 8">this unsigned integer carries the Density Threshold (DT) used by the coding coefficient generation function <a href="#CommonProc_coef_generation_func">Section 3.3</a>.  More precisely, it controls the probability of having a non zero coding coefficient, which equals (DT+1) / 16.  When a FEC Repair Packet contains several repair symbols, the DT value applies to all of them; </dd>
+  <dt>Number of Source Symbols in the encoding window, NSS (12-bit field):</dt>
+  <dd style="margin-left: 8">this unsigned integer indicates the number of source symbols in the encoding window when this repair symbol was generated.  When a FEC Repair Packet contains several repair symbols, this NSS value applies to all of them; </dd>
+  <dt>Stream Data:</dt>
+  <dd style="margin-left: 8">data for this repair symbol(s).</dd>
+</dl>
+
+<p> </p>
+<h1 id="rfc.section.4.1.3"><a href="#rfc.section.4.1.3">4.1.3.</a> Additional Procedures</h1>
+<h1 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a> FEC Code Specification</h1>
+<p id="rfc.section.4.2.p.1">This RLC FEC Scheme relies on the FEC code specification defined in <a href="#RLC">[RLC]</a>.  </p>
+<h1 id="rfc.section.4.2.1"><a href="#rfc.section.4.2.1">4.2.1.</a> Encoding Side</h1>
+<p><a href="#RLC">[RLC]</a> high level description of a Sliding Window RLC encoder also applies here to this FEC Scheme.  </p>
+<h1 id="rfc.section.4.2.2"><a href="#rfc.section.4.2.2">4.2.2.</a> Decoding Side</h1>
+<p><a href="#RLC">[RLC]</a> high level description of a Sliding Window RLC decoder also applies here to this FEC Scheme.  </p>
+<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#rlc-several-streams" id="rlc-several-streams">Sliding Window RLC FEC Scheme over GF(2^^8) when Protecting Several QUIC Streams</a></h1>
+<p id="rfc.section.5.p.1">This section focusses on the general case where FEC protection is globally applied across two or more QUIC streams.  </p>
+<p id="rfc.section.5.p.2">TODO </p>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> Security Considerations</h1>
+<p id="rfc.section.6.p.1">TBD </p>
+<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#iana" id="iana">IANA Considerations</a></h1>
+<p id="rfc.section.7.p.1">This document registers two values in the "QUIC FEC Encoding IDs" registry as follows: </p>
+
+<ul>
+  <li>XXXX refers to the Sliding Window Random Linear Codes (RLC) over GF(2^^8) FEC Scheme for a Single QUIC Stream, as defined in <a href="#rlc-single-stream">Section 4</a> of this document.</li>
+  <li>YYYY refers to the Sliding Window Random Linear Codes (RLC) over GF(2^^8) FEC Scheme for a Several QUIC Stream, as defined in <a href="#rlc-several-streams">Section 5</a> of this document.</li>
+</ul>
+
+<p> </p>
+<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> Acknowledgments</h1>
+<p id="rfc.section.8.p.1">TBD </p>
+<h1 id="rfc.references"><a href="#rfc.references">9.</a> References</h1>
+<h1 id="rfc.references.1"><a href="#rfc.references.1">9.1.</a> Normative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="Coding4QUIC">[Coding4QUIC]</b>
+      </td>
+      <td class="top"><a>Swett, I.</a>, <a>Montpetit, M-J.</a> and <a>V. Roca</a>, "<a href="https://tools.ietf.org/html/draft-swett-nwcrg-coding-for-quic">Coding for QUIC</a>", Work in Progress, NWCRG draft-swett-nwcrg-coding-for-quic (Work in Progress), February 2019.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="QUIC-transport">[QUIC-transport]</b>
+      </td>
+      <td class="top"><a title="Fastly">Iyengar, J.</a> and <a title="Mozilla">M. Thomson</a>, "<a href="http://tools.ietf.org/html/draft-ietf-quic-transport (Work in Progress)">QUIC: A UDP-Based Multiplexed and Secure Transport</a>", Internet-Draft draft-ietf-quic-transport (Work in Progress), January 2019.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC2119">[RFC2119]</b>
+      </td>
+      <td class="top"><a>Bradner, S.</a>, "<a href="http://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>", BCP 14, RFC 2119, DOI 10.17487/RFC2119, March 1997.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RLC">[RLC]</b>
+      </td>
+      <td class="top"><a>Roca, V.</a> and <a>B. Teibi</a>, "<a href="https://tools.ietf.org/html/draft-ietf-tsvwg-rlc-fec-scheme">Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Scheme for FECFRAME</a>", Work in Progress, Transport Area Working Group (TSVWG) draft-ietf-tsvwg-rlc-fec-scheme (Work in Progress), February 2019.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.references.2"><a href="#rfc.references.2">9.2.</a> Informative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="nc-taxonomy">[nc-taxonomy]</b>
+      </td>
+      <td class="top"><a title="INRIA">Roca (Ed.) et al., V.</a>, "<a href="https://datatracker.ietf.org/doc/draft-irtf-nwcrg-network-coding-taxonomy/">Taxonomy of Coding Techniques for Efficient Network Communications</a>", Request For Comments RFC 8406, June 2018.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.authors">
+  <a href="#rfc.authors">Authors' Addresses</a>
+</h1>
+<div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Vincent Roca</span> 
+	  <span class="n hidden">
+		<span class="family-name">Roca</span>
+	  </span>
+	</span>
+	<span class="org vcardline">INRIA</span>
+	<span class="adr">
+	  
+	  <span class="vcardline">
+		<span class="locality">Univ. Grenoble Alpes</span>,  
+		<span class="region"></span>
+		<span class="code"></span>
+	  </span>
+	  <span class="country-name vcardline">France</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:vincent.roca@inria.fr">vincent.roca@inria.fr</a></span>
+
+  </address>
+</div><div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Ian Swett</span> 
+	  <span class="n hidden">
+		<span class="family-name">Swett</span>
+	  </span>
+	</span>
+	<span class="org vcardline">Google</span>
+	<span class="adr">
+	  
+	  <span class="vcardline">
+		<span class="locality">Cambridge</span>,  
+		<span class="region">MA</span> 
+		<span class="code"></span>
+	  </span>
+	  <span class="country-name vcardline">US</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:ianswett@google.com">ianswett@google.com</a></span>
+
+  </address>
+</div><div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Marie-Jose Montpetit</span> 
+	  <span class="n hidden">
+		<span class="family-name">Montpetit</span>
+	  </span>
+	</span>
+	<span class="org vcardline">Triangle Video</span>
+	<span class="adr">
+	  
+	  <span class="vcardline">
+		<span class="locality">Boston</span>,  
+		<span class="region">MA</span> 
+		<span class="code"></span>
+	  </span>
+	  <span class="country-name vcardline">US</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:marie@mjmontpetit.com">marie@mjmontpetit.com</a></span>
+
+  </address>
+</div>
+
+</body>
+</html>
