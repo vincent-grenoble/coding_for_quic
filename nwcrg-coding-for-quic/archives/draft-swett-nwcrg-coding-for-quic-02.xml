@@ -608,7 +608,7 @@ Each REPAIR frame can be associated to any of the input streams it protects, and
 </t>
 
 <t>
-The REPAIR frame format is FEC Scheme dependent and MUST be defined by document specifying a FEC Scheme.
+The REPAIR frame format is FEC Scheme dependent and MUST be defined by the FEC Scheme specification document.
 One of the key information of this REPAIR frame is the composition of the block (with block codes) or encoding window (with sliding window codes) used to perform FEC encoding.
 Indeed, this is the only manner to convey this information since an application flow is not predictable (e.g., if an application flow is momentarily suspended, the composition of the block or encoding window will be affected).
 One possibility is to list, in each REPAIR frame header:

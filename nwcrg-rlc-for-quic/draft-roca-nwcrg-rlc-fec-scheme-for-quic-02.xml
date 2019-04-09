@@ -92,6 +92,21 @@
      </address>
    </author>
 
+   <author fullname="Francois Michel" initials="F." surname="Michel">
+     <organization>UC Louvain</organization>
+     <address>
+       <postal>
+         <street></street>
+         <city>Louvain</city>
+         <region></region>
+         <code></code>
+         <country>Belgium</country>
+       </postal>
+       <phone></phone>
+       <email>francois.michel@uclouvain.be</email>
+     </address>
+   </author>
+
    <date/>
 
    <area>IRTF</area>

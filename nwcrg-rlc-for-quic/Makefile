@@ -4,13 +4,13 @@ XML=${NAME_BASE}.xml
 TXT=${NAME_BASE}.txt
 HTML=${NAME_BASE}.html
 
+# Removed:html output is broken (bugs)...	xml2rfc --html ${XML}	
 all:
 	xml2rfc --text ${XML}
-	xml2rfc --html ${XML}
 
 
 # specify which version to diff with below
-PREV_VERSION=draft-roca-nwcrg-rlc-fec-scheme-for-quic-00.txt
+PREV_VERSION=draft-roca-nwcrg-rlc-fec-scheme-for-quic-01.txt
 diff:
 	rfcdiff.sh ${PREV_VERSION} ${TXT}
 
