@@ -90,7 +90,7 @@ Table of Contents
        3.5.2.  Packet-based source symbol definition . . . . . . . .   7
          3.5.2.1.  Signaling packet payloads as source symbols on
                    the wire  . . . . . . . . . . . . . . . . . . . .   7
-         3.5.2.2.  Pre-processing the source symbols payload . . . .   8
+         3.5.2.2.  Pre-processing the packet chunks  . . . . . . . .   8
        3.5.3.  Signaling a symbol recovery . . . . . . . . . . . . .   9
        3.5.4.  About Gaps in the Set of Source Symbols Considered
                During Encoding . . . . . . . . . . . . . . . . . . .   9
@@ -268,7 +268,7 @@ Internet-Draft               Coding for QUIC                   June 2019
    recently proposed DATAGRAM extension of the protocol.  Moreover, QUIC
    transfers might benefit from protecting control frames having a
    potential impact on the transmission throughput, such as MAX_DATA or
-   MAX_STREAM_DATA frames.  Rhis is why we choose a packet-based source
+   MAX_STREAM_DATA frames.  This is why we choose a packet-based source
    symbol definition that considers the sequence of frames (or a sub-
    sequence of them) transmitting through QUIC packets as source
    symbols.
@@ -421,7 +421,7 @@ Internet-Draft               Coding for QUIC                   June 2019
    Figure 3: The FEC_SOURCE_ID frame format.  The Source Symbol ID field
               content is defined by the underlying FEC scheme
 
-3.5.2.2.  Pre-processing the source symbols payload
+3.5.2.2.  Pre-processing the packet chunks
 
    Note:  We might want to remove the following paragraph as it could be
        a duplicate of what has been already said.

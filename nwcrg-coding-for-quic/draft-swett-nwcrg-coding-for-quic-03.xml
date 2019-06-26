@@ -269,7 +269,7 @@ The traffic being encrypted end-to-end, the middleboxes are not in position to p
             <t>
                 Although application data are originally intended to be transmitted through the QUIC stream abstraction, the design of QUIC aims at easy extensibility and other means
                 of application data transmission could be added as QUIC extensions. This is already the case for the recently proposed DATAGRAM extension of the protocol. Moreover, QUIC
-                transfers might benefit from protecting control frames having a potential impact on the transmission throughput, such as MAX_DATA or MAX_STREAM_DATA frames. Rhis is why we choose
+                transfers might benefit from protecting control frames having a potential impact on the transmission throughput, such as MAX_DATA or MAX_STREAM_DATA frames. This is why we choose
                 a packet-based source symbol definition that considers the sequence of frames (or a sub-sequence of them) transmitting through QUIC packets as source symbols.
             </t>
 
