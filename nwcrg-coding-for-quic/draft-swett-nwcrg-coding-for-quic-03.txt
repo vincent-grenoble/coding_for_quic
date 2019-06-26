@@ -90,13 +90,14 @@ Table of Contents
        3.5.2.  Packet-based source symbol definition . . . . . . . .   7
          3.5.2.1.  Signaling packet payloads as source symbols on
                    the wire  . . . . . . . . . . . . . . . . . . . .   7
+         3.5.2.2.  Pre-processing the source symbols payload . . . .   8
        3.5.3.  Signaling a symbol recovery . . . . . . . . . . . . .   9
        3.5.4.  About Gaps in the Set of Source Symbols Considered
                During Encoding . . . . . . . . . . . . . . . . . . .   9
      3.6.  FEC Scheme Negotiation in QUIC  . . . . . . . . . . . . .  10
-       3.6.1.  FEC Scheme Selection Process  . . . . . . . . . . . .  10
+       3.6.1.  FEC Scheme Selection Process  . . . . . . . . . . . .  11
        3.6.2.  FEC Scheme Configuration Information  . . . . . . . .  11
-     3.7.  Procedures when Protecting a Single QUIC Stream . . . . .  11
+     3.7.  Procedures when Protecting a Single QUIC Stream . . . . .  12
      3.8.  Signaling Considerations within REPAIR Frames . . . . . .  12
    4.  Procedures when Protecting Several QUIC Streams . . . . . . .  12
      4.1.  Application data, STREAM Frame data and Source Symbols  .  13
@@ -105,7 +106,6 @@ Table of Contents
    5.  Security Considerations . . . . . . . . . . . . . . . . . . .  15
    6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
    7.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  15
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
 
 
 
@@ -114,6 +114,7 @@ Swett, et al.           Expires December 28, 2019               [Page 2]
 Internet-Draft               Coding for QUIC                   June 2019
 
 
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .  15
      8.2.  Informative References  . . . . . . . . . . . . . . . . .  16
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  16
@@ -160,7 +161,6 @@ Internet-Draft               Coding for QUIC                   June 2019
    Terms and definitions that apply to coding are available in
    [nc-taxonomy].  More specifically, this document uses the following
    definitions:
-
 
 
 
@@ -357,7 +357,7 @@ Internet-Draft               Coding for QUIC                   June 2019
                    <  -SS1- ><  -SS2- ><  -SS3- ><  -SS4- >
                       < -E- >   < -E- >   < -E- >   < -E- >
    +---------------+-+-------+-+-------+-+-------+-+-------+
-   | Packet Header |0|       |1|       |1|       |2|       |
+   | Packet Header |0| CHUNK |1| CHUNK |1| CHUNK |2| CHUNK |
    +---------------+-+-------+-+-------+-+-------+-+-------+
 
       Figure 2: Example of source symbol mapping, when the E value is
@@ -421,6 +421,8 @@ Internet-Draft               Coding for QUIC                   June 2019
    Figure 3: The FEC_SOURCE_ID frame format.  The Source Symbol ID field
               content is defined by the underlying FEC scheme
 
+3.5.2.2.  Pre-processing the source symbols payload
+
    Note:  We might want to remove the following paragraph as it could be
        a duplicate of what has been already said.
 
@@ -440,8 +442,6 @@ Internet-Draft               Coding for QUIC                   June 2019
       PADDING frames to a source symbol before proceeding to encoding.
       Adding PADDING frames to source symbols before encoding allows
       protecting packets of different sizes.  The smaller packet payload
-      will be added PADDING frames to match the size of the largest
-      packet payload in the encoding window.
 
 
 
@@ -449,6 +449,9 @@ Swett, et al.           Expires December 28, 2019               [Page 8]
 
 Internet-Draft               Coding for QUIC                   June 2019
 
+
+      will be added PADDING frames to match the size of the largest
+      packet payload in the encoding window.
 
    Note:  Maybe the decision of adding data such as padding in the
        source symbols should be leaved to the underlying FEC Scheme.
@@ -495,9 +498,6 @@ Internet-Draft               Coding for QUIC                   June 2019
    composition of the block or encoding window.  Without any gap, the
    identity of the first source symbol plus the number of symbols in the
    block or encoding window is sufficient.  With gaps, a more complex
-   encoding needs to be used, perhaps similar to the encoding used for
-   selective acknowledgments.
-
 
 
 
@@ -505,6 +505,9 @@ Swett, et al.           Expires December 28, 2019               [Page 9]
 
 Internet-Draft               Coding for QUIC                   June 2019
 
+
+   encoding needs to be used, perhaps similar to the encoding used for
+   selective acknowledgments.
 
    Whether or not gaps are supported MUST be clarified in each FEC
    Scheme.
@@ -547,11 +550,8 @@ Internet-Draft               Coding for QUIC                   June 2019
           a FEC Scheme on a QUIC session basis, therefore to be used for
           all the Streams that need FEC protection?
 
-3.6.1.  FEC Scheme Selection Process
 
-   Let us consider the FEC Scheme selection process between the QUIC
-   endpoints.  Figure 4 illustrates the principle when a QUIC reception
-   endpoint initiates the exchange.
+
 
 
 
@@ -561,6 +561,12 @@ Swett, et al.           Expires December 28, 2019              [Page 10]
 
 Internet-Draft               Coding for QUIC                   June 2019
 
+
+3.6.1.  FEC Scheme Selection Process
+
+   Let us consider the FEC Scheme selection process between the QUIC
+   endpoints.  Figure 4 illustrates the principle when a QUIC reception
+   endpoint initiates the exchange.
 
    QUIC sender                                       QUIC receiver
          < - - - - - - - - - - - - - - - - - - - - - -
@@ -602,12 +608,6 @@ Internet-Draft               Coding for QUIC                   June 2019
    sufficient, the supported_fec_scheme_64b can be used instead and
    proposes a 64 bit opaque field.
 
-3.7.  Procedures when Protecting a Single QUIC Stream
-
-   This section focuses on the simple case where FEC protection is
-   applied to a single QUIC stream.  We consider a unidirectional data
-   flow between a QUIC sending endpoint and one (or more) QUIC reception
-   endpoints.
 
 
 
@@ -617,6 +617,13 @@ Swett, et al.           Expires December 28, 2019              [Page 11]
 
 Internet-Draft               Coding for QUIC                   June 2019
 
+
+3.7.  Procedures when Protecting a Single QUIC Stream
+
+   This section focuses on the simple case where FEC protection is
+   applied to a single QUIC stream.  We consider a unidirectional data
+   flow between a QUIC sending endpoint and one (or more) QUIC reception
+   endpoints.
 
 3.8.  Signaling Considerations within REPAIR Frames
 
@@ -660,13 +667,6 @@ Internet-Draft               Coding for QUIC                   June 2019
        adds specification and implementation complexity that need to be
        balanced with the expected benefits.
 
-       *  Receiver: A first complexity comes from the requirement to
-          identify to which stream a decoded source symbol belongs to.
-          This is also one of the main difficulty for FECFRAME (both
-          with block and sliding window codes) which required to
-          distinguish an ADU (submitted by the application) from an ADUI
-
-
 
 
 Swett, et al.           Expires December 28, 2019              [Page 12]
@@ -674,6 +674,11 @@ Swett, et al.           Expires December 28, 2019              [Page 12]
 Internet-Draft               Coding for QUIC                   June 2019
 
 
+       *  Receiver: A first complexity comes from the requirement to
+          identify to which stream a decoded source symbol belongs to.
+          This is also one of the main difficulty for FECFRAME (both
+          with block and sliding window codes) which required to
+          distinguish an ADU (submitted by the application) from an ADUI
           (the same ADU plus an additional FlowID among other things).
           Do we want this level of complexity?
 
@@ -714,11 +719,6 @@ Internet-Draft               Coding for QUIC                   June 2019
    Figure 5 illustrates, in case of a Sliding Window FEC Scheme, an
    encoding window with source symbols belonging to two streams, of
    Stream ID 120 and 51 respectively.
-
-
-
-
-
 
 
 

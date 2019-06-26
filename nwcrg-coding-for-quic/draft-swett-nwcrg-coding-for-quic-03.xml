@@ -348,7 +348,7 @@ On the opposite, frames that carry one or more repair symbols use a dedicated RE
                 <  -SS1- ><  -SS2- ><  -SS3- ><  -SS4- >
                    < -E- >   < -E- >   < -E- >   < -E- >
 +---------------+-+-------+-+-------+-+-------+-+-------+
-| Packet Header |0|       |1|       |1|       |2|       |
+| Packet Header |0| CHUNK |1| CHUNK |1| CHUNK |2| CHUNK |
 +---------------+-+-------+-+-------+-+-------+-+-------+
                     ]]></artwork>
                     </figure>
@@ -395,6 +395,9 @@ On the opposite, frames that carry one or more repair symbols use a dedicated RE
 ]]></artwork>
                 </figure>
 
+			</section>
+
+			<section title="Pre-processing the packet chunks">
 				<t>
 					<list hangIndent="4" style="hanging">
 						<t hangText="Note:">
