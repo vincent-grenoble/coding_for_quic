@@ -122,7 +122,7 @@
 This document focuses on the integration of FEC coding in the QUIC transport protocol, in order to recover from packet losses.
 This document does not specify any FEC code but defines mechanisms to negotiate and integrate FEC Schemes in QUIC.
 By using proactive loss recovery, it is expected to improve QUIC performance in sessions impacted by packet losses.
-More precisely it is expected to improve QUIC performance with real-time sessions (since FEC coding makes packet loss recovery insensitive to the round trip time), with multicast sessions (since the same repair packet can recover several different losses at several receivers), and with multipath sessions (since repair packets add diversity).
+More precisely it is expected to improve QUIC performance with real-time sessions (since FEC coding makes packet loss recovery insensitive to the round trip time), with short sessions (since FEC coding can help recovering from tail losses more rapidely than through retransmissions), with multicast sessions (since the same repair packet can recover several different losses at several receivers), and with multipath sessions (since repair packets add diversity and flexibility).
 </t>
    </abstract>
 
@@ -142,8 +142,9 @@ This document specifies a framework to enable FEC codes to be used to recover fr
 The ability to add FEC coding in QUIC may be beneficial in several situations:
 <list style="symbols">
     <t>for a robust transmission of latency sensitive traffic, for instance real-time flows, since it enables to recover packet losses independently of the round trip time;</t>
+    <t>for short sessions, in order to protect the last few packets sent, since it enables to recover from tail losses more rapidely than through retransmissions;</t>
     <t>for the transmission of contents to a large set of QUIC reception endpoints, since the same repair frame may help recovering several different packet losses at different receivers;</t>
-    <t>for multipath communications, since repair traffic adds diversity.</t>
+    <t>for multipath communications, since repair traffic adds diversity and flexibility.</t>
 </list>
 </t>
 
@@ -170,9 +171,9 @@ More specifically, this document uses the following definitions:
     <t hangText="Packet versus Symbol:">	a Packet is the unit of data that is exchanged over the network while a Symbol is
         the unit of data that is manipulated during the encoding and decoding operations</t>
 
-    <t hangText="Source Symbol:">	a unit of data originating from the source that is used as input to encoding operations</t>
+    <t hangText="Source Symbol:">		a unit of data originating from the source that is used as input to encoding operations</t>
 
-    <t hangText="Repair Symbol:">	a unit of data that is the result of a coding operation</t>
+    <t hangText="Repair Symbol:">		a unit of data that is the result of a coding operation</t>
 
 </list></t>
 
@@ -229,8 +230,6 @@ This will be implemented using the one step negotiation of the new QUIC negotiat
 
         <t> It is not clear whether negotiation is meant to select a **single** FEC Scheme or **multiple** FEC Schemes.
         In the second case (multiple FEC) it is required to have a complementary mechanism to indicate which FEC Scheme is used in a given REPAIR frame (which could be done through as many REPAIR frame type values as potential FEC Scheme negotiated). Is it what we want to achieve? Not sure.</t>
-
-        <t> It is not clear whether negotiation is carried out at QUIC level (and therefore for multiple streams) or at a stream level (and therefore multiple streams may use multiple FEC Schemes). The terminology used above should be updated to reflect the choice.</t>
     </list></t>
 </list> </t>
 
@@ -241,7 +240,7 @@ This will be implemented using the one step negotiation of the new QUIC negotiat
 
 <t>
 FEC encoding is applied before any QUIC encryption and authentication processing.
-Source symbols, that constitute the data units used by the FEC codec, contain cleartext application data.
+Source symbols, that constitute the data units used by the FEC codec, contain cleartext data (application and/or QUIC data).
 </t>
 
 <!--
@@ -263,14 +262,40 @@ The traffic being encrypted end-to-end, the middleboxes are not in position to p
 
         </section>
 
+    </section>
+
+
+<!-- =========================================================================================== -->
+
+
+    <section anchor="sec:fec-protection-principles" title="FEC Protection Principles">
+    <!-- ====================== -->
+
+<t>
+The present section explains how FEC encoding can be applied to QUIC.
+It defines the mapping between QUIC packet frames to source symbols, as well as the general ideas behind the associated signalling.
+It does not define all the details that are FEC Scheme specific, and therefore must be specified in the FEC Scheme document.
+However this section sketches the general ideas that should be followed.
+</t>
+
+        <section anchor="sec:cross-pkt-frames-fec" title="The Cross Packet Frames FEC Encoding Approach">
+        <!-- ====================== -->
+
+<t>
+Although application data are originally intended to be transmitted through the QUIC stream abstraction, the design of QUIC aims at easy extensibility and other means
+of application data transmission could be added as QUIC extensions. This is already the case for the recently proposed DATAGRAM extension of the protocol. Moreover, QUIC
+transfers might benefit from protecting control frames having a potential impact on the transmission throughput, such as MAX_DATA or MAX_STREAM_DATA frames.
+Therefore this document introduces an FEC protection across all or a subset of the frames of a given QUIC packet.
+This design choice impacts the QUIC packet to source symbols definitions, as well as the proposed signalling.
+</t>
+
+        </section>
+
         <section title="Source symbol definition">
         <!-- ====================== -->
 
             <t>
-                Although application data are originally intended to be transmitted through the QUIC stream abstraction, the design of QUIC aims at easy extensibility and other means
-                of application data transmission could be added as QUIC extensions. This is already the case for the recently proposed DATAGRAM extension of the protocol. Moreover, QUIC
-                transfers might benefit from protecting control frames having a potential impact on the transmission throughput, such as MAX_DATA or MAX_STREAM_DATA frames. This is why we choose
-                a packet-based source symbol definition that considers the sequence of frames (or a sub-sequence of them) transmitting through QUIC packets as source symbols.
+We choose a packet-based source symbol definition that considers the sequence of frames (or a sub-sequence of them) transmitted through QUIC packets.
             </t>
 
 
@@ -279,7 +304,7 @@ The traffic being encrypted end-to-end, the middleboxes are not in position to p
             <!-- ====================== -->
 
 <t>
-In order to facilitate experiments, and in order to enable backward compatibility, the STREAM frames that carry application data are kept unmodified.
+In order to facilitate experiments, and in order to enable backward compatibility, the STREAM frames that carry application data are kept unmodified, just adding a dedicated frame type to carry signalling, chosen within the type range dedicated to "Extension Frames" (a legacy receiver will automatically ignore this unknown signalling frame).
 On the opposite, frames that carry one or more repair symbols use a dedicated REPAIR frame type, chosen within the type range dedicated to "Extension Frames".
 </t>
 
@@ -326,29 +351,28 @@ On the opposite, frames that carry one or more repair symbols use a dedicated RE
                     <t>
                         E MUST be strictly greater than zero bytes and strictly smaller than the minimum PMTU value allowed by QUIC.
                         The packet header is not part of the FEC-protected data.
-                        When the packet payload size is not a multiple of E, zero-padding MUST be added at the beginning of the first
+                        When the packet payload size is not a multiple of E-1, zero-padding MUST be added at the beginning of the first
                         chunk of the packet payload. This is equivalent to insert PADDING frames at the beginning of the payload.
-                        This zero-padding SHOULD NOT be sent on the wire and the packet is thus sent unmodified.
+                        This zero-padding SHOULD NOT be sent on the wire.  <!-- and the packet is thus sent unmodified. VR: except that we add a signaling header => packet is modified -->
                         The choice of an appropriate value for E may depend on the use case (in particular on the nature of application data).
-                        A reasonably small value reduces the expected value of the added padding needed to align the payload size with a multiple of E.
-                        However an overly small value also increases processing complexity (FEC encoding and decoding are performed over a larger linear system)
-                        so there is an incentive to use a larger value.
+                        A reasonably small value reduces the expected value of the added padding needed to align the payload size with a multiple of E-1.
+                        However an overly small value also increases processing complexity (FEC encoding and decoding are performed over a larger linear system), so there is an incentive to use a larger value.
                         An appropriate balance should be found, and this choice is considered as out of scope for this document.
                     </t>
                 </section>
                 <section title="Defining the source symbols">
                     <t>
-                        We define source symbols as the concatenation of metadata and one packet chunk. These source symbols are only used during encoding and decoding
-                        and are not sent as-is on the wire.
+                        We define source symbols as the concatenation of a single byte of metadata and one packet chunk.
+                        These source symbols are only used during encoding and decoding and are not sent as-is on the wire.
                         <xref target="fig_ss_encoding"/> shows an example of 4 source symbols with their metadata.
                     </t>
 
                     <figure anchor="fig_ss_encoding" title="Example of source symbol mapping, when the E value is relatively small.">
                         <artwork><![CDATA[
-                <  -SS1- ><  -SS2- ><  -SS3- ><  -SS4- >
-                   < -E- >   < -E- >   < -E- >   < -E- >
+                < --SS1- >< --SS2- >< --SS3- >< --SS4- >
+                < ---E-- >< ---E-- >< ---E-- >< ---E-- >
 +---------------+-+-------+-+-------+-+-------+-+-------+
-| Packet Header |0| CHUNK |1| CHUNK |1| CHUNK |2| CHUNK |
+| Packet Header |0| chunk |1| chunk |1| chunk |2| chunk |
 +---------------+-+-------+-+-------+-+-------+-+-------+
                     ]]></artwork>
                     </figure>
@@ -571,10 +595,9 @@ opaque field.
     </section>
 
 
-<!-- =========================================================================================== -->
+<!-- 
 
     <section title="Procedures when Protecting a Single QUIC Stream">
-    <!-- ====================== -->
 
 <t>
 This section focuses on the simple case where FEC protection is applied to a single QUIC stream.
@@ -586,13 +609,9 @@ We consider a unidirectional data flow between a QUIC sending endpoint and one (
 
 
         <section title="Signaling Considerations within REPAIR Frames">
-        <!-- ====================== -->
 
 <t>
-<!--Once the initial negotiation succeeded and an appropriate FEC Scheme has been chosen between the QUIC endpoints, data is exchanged as follows.-->
-<!--Source data is transmitted within STREAM frames, as would happen without any FEC based loss recovery mechanism (in particular without considering source symbols boundaries).-->
 Repair data, computed during FEC encoding, is sent within a dedicated REPAIR frame type, chosen within the type range dedicated to "Extension Frames".
-<!--In both cases, the same Stream ID is used since both flows relate to the same stream.-->
 </t>
 
 <t>
@@ -603,13 +622,8 @@ It implies that each REPAIR symbol MUST communicate the block (with block codes)
 When there is no gap in the source symbol set, this MAY be achieved by communicating:
 <list style="symbols">
     <t>the offset of the first source symbol of the block or encoding window;</t>
-    <t>the number of source symbols in the block or encoding window
-<!--		, which can be either a number of symbols or a number of bytes since symbols are of fixed size, E-->
-        .</t>
+    <t>the number of source symbols in the block or encoding window.</t>
 </list>
-<!--The text commented hereunder is now already explained in the section about source symbol definition.-->
-<!--Note that unlike FEC Schemes for FLUTE/ALC, NORM, and FECFRAME, here there is no notion of Encoding Symbol Id (ESI).-->
-<!--The use of an offset within the stream, with the guaranty that no wrapping to zero can occur, provides an alternative mechanism to identify any source symbol.-->
 </t>
 
 
@@ -632,10 +646,8 @@ When there is no gap in the source symbol set, this MAY be achieved by communica
     </section>
 
 
-<!-- =========================================================================================== -->
 
     <section title="Procedures when Protecting Several QUIC Streams">
-    <!-- ====================== -->
 
 <t>
 This section focuses on the general case where FEC protection is globally applied across two or more QUIC streams.
@@ -662,7 +674,6 @@ It adds specification and implementation complexity that need to be balanced wit
 </t>
 
         <section title="Application data, STREAM Frame data and Source Symbols">
-        <!-- ====================== -->
 
 <t>
 Within each stream, the source symbols MUST be defined as in the simple case of a single stream.
@@ -672,7 +683,6 @@ Within each stream, the source symbols MUST be defined as in the simple case of 
         </section>
 
         <section title="Block or Encoding Window Management">
-        <!-- ====================== -->
 
 <t>
 The details of how to create the block or encoding window are specific to the FEC Scheme.
@@ -691,13 +701,6 @@ These sequences do not follow any timing consideration in order to simplify sign
 
 <figure anchor="fig_ew_across_2_streams" title="Example of encoding window of a Sliding Window FEC Scheme and FEC protection across two streams.">
         <artwork><![CDATA[
-< ----------- Stream ID 120 ---------- > < --- Stream ID 51 --- >
-+-------+-------+-------+-------+-------+-------+-------+-------+
-|       |       |       |       |       |       |       |       |
-+-------+-------+-------+-------+-------+-------+-------+-------+
- ^       < -E- >                         ^
- |                                       |
-offset = 0x42f0, length = 5*E       offset = 0x0f24, length = 3*E
 ]]></artwork>
 </figure>
 
@@ -705,7 +708,6 @@ offset = 0x42f0, length = 5*E       offset = 0x0f24, length = 3*E
 
 
         <section title="Signaling Considerations within STREAM and REPAIR Frames">
-        <!-- ====================== -->
 
 <t>
 Source data on each stream is transmitted within STREAM frames, as would happen without any FEC based loss recovery mechanism.
@@ -744,7 +746,9 @@ This would mean that a timestamp is attached to each source symbol in order to i
 
         </section>
 
+-->
     </section>
+
 
 
 <!-- =========================================================================================== -->
