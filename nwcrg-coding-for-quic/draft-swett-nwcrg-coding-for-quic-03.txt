@@ -314,21 +314,21 @@ Internet-Draft               Coding for QUIC                   July 2019
 
    Figure 1 illustrates how QUIC packets payloads can be divided into
    fixed-size chunks to facilitate the encoding of the source symbols.
-   Any chunk is of fixed size (E bytes), leading a packet to potentially
-   contain more than one chunk.
+   Any chunk is of fixed size (E-1 bytes), leading a packet to
+   potentially contain more than one chunk.
 
-           < -E- > < -E- > < -E- > < -E- >
-   +------+-------+-------+-------+-------+
+          |< E-1 >|< E-1 >|< E-1 >|< E-1 >|
+   +------|-------|-------|-------|-------|
    |Header|        Packet Payload         |  chunks 0, 1, 2, 3
-   +------+-------+-------+-------+-------+
-   |Header|  Packet Payload |                chunks 4, 5, 6
-   +------+-------+-------+-------+--+
-   |Header|      Packet Payload      |       chunks 7, 8, 9, 10
-   +------+-------+-------+-------+--+
+   +------|-----+-|-------|-------|-------+
+   |Header| 0   | Packet Payload  |          chunks 4, 5, 6
+   +------|---+-+-|-------|-------|
+   |Header| 0 | Packet Payload    |          chunks 7, 8, 9
+   +------|---+---|-------|-------|
+          |       |       |       |       |
 
-      Figure 1: Example of source symbol mapping, when the E value is
-                             relatively small.
-
+     Figure 1: Example of source symbol mapping, when the E-1 value is
+         relatively small, with prepended zero padding if needed.
 
 
 
