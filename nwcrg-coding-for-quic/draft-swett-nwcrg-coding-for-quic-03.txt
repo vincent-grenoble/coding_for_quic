@@ -97,14 +97,14 @@ Table of Contents
      4.5.  Signaling a Symbol Recovery . . . . . . . . . . . . . . .  11
      4.6.  About Gaps in the Set of Source Symbols Considered During
            Encoding  . . . . . . . . . . . . . . . . . . . . . . . .  11
-   5.  FEC Scheme Negotiation in QUIC  . . . . . . . . . . . . . . .  11
+   5.  FEC Scheme Negotiation in QUIC  . . . . . . . . . . . . . . .  12
      5.1.  FEC Scheme Selection Process  . . . . . . . . . . . . . .  12
      5.2.  FEC Scheme Configuration Information  . . . . . . . . . .  13
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
-   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  13
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  13
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  13
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
+   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  14
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  14
      9.2.  Informative References  . . . . . . . . . . . . . . . . .  14
 
 
@@ -114,7 +114,7 @@ Swett, et al.            Expires January 6, 2020                [Page 2]
 Internet-Draft               Coding for QUIC                   July 2019
 
 
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  14
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  15
 
 1.  Introduction
 
@@ -477,6 +477,9 @@ Internet-Draft               Coding for QUIC                   July 2019
    Note:  We might want to propose standard ways/algorithms to add/
        remove data before the encoding ?
 
+   TODO:  Add a mechanism to add QUIC packet identifier to the metadata.
+       It's useful.
+
 4.2.3.  Source Symbol Size (E) Considerations
 
    The source symbol size, E, MUST be strictly greater than zero bytes
@@ -495,9 +498,6 @@ Internet-Draft               Coding for QUIC                   July 2019
    approach when dealing with QUIC packets whose size significantly
    vary.  However an overly small value also increases processing
    complexity (FEC encoding and decoding are performed over a larger
-   linear system since there are more source symbols), so there is an
-   incentive to use a larger value.  An appropriate balance should be
-   found, and this choice is considered as out of scope for this
 
 
 
@@ -506,6 +506,9 @@ Swett, et al.            Expires January 6, 2020                [Page 9]
 Internet-Draft               Coding for QUIC                   July 2019
 
 
+   linear system since there are more source symbols), so there is an
+   incentive to use a larger value.  An appropriate balance should be
+   found, and this choice is considered as out of scope for this
    document.  Since a repair symbol will transit through a frame, the E
    value must take this into account to avoid having REPAIR frames that
    do not fit into a single QUIC packet.
@@ -554,9 +557,6 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
 
-
-
-
 Swett, et al.            Expires January 6, 2020               [Page 10]
 
 Internet-Draft               Coding for QUIC                   July 2019
@@ -564,16 +564,21 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 4.5.  Signaling a Symbol Recovery
 
-   When source symbols are recovered, a QUIC receiver SHOULD advertise
-   the symbols recoveries to the sender in order to avoid retransmission
-   of already received data.  The QUIC receiver MUST NOT acknowledge
-   packets that have been recovered, as it would interfere with the
-   behaviour of loss-based congestion controls such as [Cubic].
+   When all the source symbols of a given QUIC packet have been lost but
+   are recovered during FEC decoding, a QUIC receiver SHOULD advertise
+   it to the sender in order to avoid the retransmission of already
+   available data.  However, the QUIC receiver MUST NOT acknowledge this
+   recovered packet through a regular acknowledement, as it would
+   interfere with the behaviour of loss-based congestion controls such
+   as [Cubic].  Therefore this document introduces a dedicated RECOVERED
+   frame, that enables a receiver to indicate that a specific QUIC
+   packet has been recovered through FEC decoding.
 
-   Note:  Being able to signal a QUIC packet recovery requires to
-       identify this packet.  Hence the question on adding the
-       capability to recover this piece of information during FEC
-       decoding.
+   The RECOVERED frame works at the packet level.  It is therefore
+   required to be able to identify to which packet the recovered source
+   symbols belong to.  This is made possible by the QUIC packet
+   identifier field added to the meta data prior to FEC encoding
+   (Section 4.2.2).
 
 4.6.  About Gaps in the Set of Source Symbols Considered During Encoding
 
@@ -601,13 +606,8 @@ Internet-Draft               Coding for QUIC                   July 2019
    Whether or not gaps are supported MUST be clarified in each FEC
    Scheme.
 
-5.  FEC Scheme Negotiation in QUIC
 
-   FEC Scheme negotiation has two goals:
 
-   o  Selecting a FEC Scheme (or FEC Schemes) that can be used by the
-      QUIC transmission and reception endpoints.  This process requires
-      an exchange between them;
 
 
 
@@ -617,6 +617,14 @@ Swett, et al.            Expires January 6, 2020               [Page 11]
 
 Internet-Draft               Coding for QUIC                   July 2019
 
+
+5.  FEC Scheme Negotiation in QUIC
+
+   FEC Scheme negotiation has two goals:
+
+   o  Selecting a FEC Scheme (or FEC Schemes) that can be used by the
+      QUIC transmission and reception endpoints.  This process requires
+      an exchange between them;
 
    o  Communicating a certain number of parameters, the "Configuration
       Information", that are not expected to change over the session
@@ -654,6 +662,18 @@ Internet-Draft               Coding for QUIC                   July 2019
    endpoints.  Figure 5 illustrates the principle when a QUIC reception
    endpoint initiates the exchange.
 
+
+
+
+
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 12]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
+
    QUIC sender                                       QUIC receiver
          < - - - - - - - - - - - - - - - - - - - - - -
                 supported_fec_scheme_32b{FEC_Encoding_ID1 | other}
@@ -665,14 +685,6 @@ Internet-Draft               Coding for QUIC                   July 2019
 
     Figure 5: Example FEC Scheme selection process, during the initial
                                negotiation.
-
-
-
-
-Swett, et al.            Expires January 6, 2020               [Page 12]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
 
    The supported_fec_scheme_16b and supported_fec_scheme_32b are two new
    TransportParameterId to be added to the "Table 7: Initial QUIC
@@ -706,6 +718,18 @@ Internet-Draft               Coding for QUIC                   July 2019
 
    TBD
 
+
+
+
+
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 13]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
+
 7.  IANA Considerations
 
    TBD
@@ -722,13 +746,6 @@ Internet-Draft               Coding for QUIC                   July 2019
               R. Scheffenegger, "CUBIC for Fast Long-Distance Networks",
               RFC 8312, DOI 10.17487/RFC8312, February 2018,
               <https://www.rfc-editor.org/info/rfc8312>.
-
-
-
-Swett, et al.            Expires January 6, 2020               [Page 13]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
 
    [QUIC-transport]
               Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
@@ -753,14 +770,21 @@ Internet-Draft               Coding for QUIC                   July 2019
               (RLC) Forward Erasure Correction (FEC) Scheme for
               FECFRAME", Work in Progress, Transport Area Working Group
               (TSVWG) draft-ietf-tsvwg-rlc-fec-scheme (Work in
-              Progress), February 2019, <https://tools.ietf.org/html/
-              draft-ietf-tsvwg-rlc-fec-scheme>.
+              Progress), June 2019, <https://tools.ietf.org/html/draft-
+              ietf-tsvwg-rlc-fec-scheme>.
 
    [nc-taxonomy]
               Roca (Ed.) et al., V., "Taxonomy of Coding Techniques for
               Efficient Network Communications", Request For Comments
               RFC 8406, June 2018, <https://datatracker.ietf.org/doc/
               draft-irtf-nwcrg-network-coding-taxonomy/>.
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 14]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
 
 Authors' Addresses
 
@@ -780,12 +804,6 @@ Authors' Addresses
    Email: marie@mjmontpetit.com
 
 
-
-Swett, et al.            Expires January 6, 2020               [Page 14]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
    Vincent Roca
    INRIA
    Univ. Grenoble Alpes
@@ -800,24 +818,6 @@ Internet-Draft               Coding for QUIC                   July 2019
    Belgium
 
    Email: francois.michel@uclouvain.be
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

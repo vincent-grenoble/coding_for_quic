@@ -349,14 +349,12 @@ QUIC pkt 2 |Header| 0 |  Packet Payload   |         chunks 7, 8, 9
                 <section anchor="sec:chunk-to-src-symb" title="Packet Chunk to Source Symbol Mapping">
                 <!-- ====================== -->
 
-<!--
 <t>
 The second step consists in producing the source symbols.
 A source symbols is the concatenation of a single byte of metadata and a packet chunk (<xref target="fig:ss-format"/>).
 Each source symbol is of fixed-size E bytes.
 These source symbols are only used during encoding and decoding and are not sent as-is on the network.
 </t>
--->
 
                     <figure anchor="fig:ss-format" title="Source symbol format.">
                         <artwork><![CDATA[
@@ -378,7 +376,6 @@ data
                     ]]></artwork>
                     </figure>
 
-<!--
 <t>
 <xref target="fig:metadata-format"/> shows the format of the 1 byte metadata.
 The fields are the following:
@@ -395,7 +392,6 @@ The fields are the following:
 		</t>
 </list>
 </t>
--->
 
                     <figure anchor="fig:ss-encoding" title="Example of packet chunk to source symbol mapping, when the E value is relatively small.">
                         <artwork><![CDATA[
@@ -414,7 +410,6 @@ QUIC packet
                     ]]></artwork>
                     </figure>
 
-<!--
 <t>
 <xref target="fig:ss-encoding"/> shows an example where the 4 source symbols are created from the payload of a given QUIC packet.
 The first chunk contains zero padding at the begining in order to align the protected packet payload size to a multiple of E-1.
@@ -425,7 +420,7 @@ Each source symbol is uniquely identified allowing to determine unambiguously it
 What information to associate to a source symbol to uniquely identify it is FEC Scheme dependant.
 <xref target="sec:src_symb_signaling"/> gives insight on this topic.
 </t>
--->
+
 
                     <section title="Open questions: Content of Source Symbols Metadata? Removing certain frames from FEC protection?">
                     <!-- ====================== -->
@@ -471,13 +466,13 @@ This information might for example be encoded in the Source Symbol ID by the FEC
 </list>
 </t>
 
-                    </section>
-
 <t>
 <list hangIndent="4" style="hanging">
-	<t hangText="TODO:"> add a mechanism to add QUIC packet identifier to the metadata.</t>
+	<t hangText="TODO:"> Add a mechanism to add QUIC packet identifier to the metadata. It's useful.</t>
 </list>
 </t>
+
+                    </section>
 
                 </section>
 
@@ -795,34 +790,13 @@ opaque field.
         <title>Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Scheme for FECFRAME</title>
             <author initials="V" surname="Roca" fullname="Vincent Roca"> <organization /> </author>
             <author initials="B" surname="Teibi" fullname="Belkacem Teibi"> <organization /> </author>
-            <date month="February" year="2019" />
+            <date month="June" year="2019" />
         </front>
         <seriesInfo name='Work in' value='Progress' />
         <seriesInfo name='Transport Area Working Group (TSVWG)' value='draft-ietf-tsvwg-rlc-fec-scheme (Work in Progress)' />
     </reference>
 
    </references>
-
-<!--
-    <section anchor="avail-algo" title="Appendix: Reference Algorithms">
-
-<t>This ID does not mandate nor depends on any coding scheme. However, in order to have an initial implementation with good performance and not encumbered by intellectual property and proprietary implementations, it is suggested to use the Raptor (RFC 5053) as a reference algorithm. However, since the Raptor code perform badly with small blocks, depending on the application, another alternative is to use Reed-Solomon (RFC 5510) codes. It is assumed that other candidates that are free of IPR may become candidates in the future.
-</t>
-    </section>
-
-    <section anchor="middleboxes" title="Appendix: Participating Middleboxes">
-
-<t>The coding approach described in this document does allow on path elements that have the ephemeral keys to decrypt packets and add or remove FEC packets.</t>
-</section>
-
-    <section anchor="API" title="Appendix: APIS">
-
-<t>It is planned that the QUIC coding mechanism will conform to any common API defined in the research group.</t>
-
-    </section>
--->
-
-   <!-- Change Log v00 2017-03-03  MJM   Initial version -->
 
 </back>
 
