@@ -274,39 +274,44 @@ The traffic being encrypted end-to-end, the middleboxes are not in position to p
 
 <t>
 The present section explains how FEC encoding can be applied to QUIC.
-It defines the general ideas for mapping QUIC packet frames to source symbols, as well as the associated signalling.
-However this section does not define the FEC Scheme specific details that need to be specified in the related document.
+It defines the general ideas for mapping QUIC packet frames to source symbols, as well as the associated signaling.
+This section does not define the FEC Scheme specific details that need to be specified in a companion document.
 </t>
 
         <section anchor="sec:cross-pkt-frames-fec" title="Cross Packet Frames FEC Encoding">
         <!-- ====================== -->
 
 <t>
-Although application data are originally intended to be transmitted through the QUIC stream abstraction, the design of QUIC aims at easy extensibility and other means
-of application data transmission could be added as QUIC extensions. This is already the case for the proposed DATAGRAM extension of the protocol.
-Moreover, QUIC transfers might benefit from protecting control frames having a potential impact on the transmission throughput, such as MAX_DATA or MAX_STREAM_DATA frames.
-Therefore this document introduces an FEC protection across all or a subset of the frames of a given QUIC packet.
-This design choice impacts the QUIC packet to source symbols definitions, as well as the proposed signalling.
+Application data can be transmitted through the QUIC stream abstraction, or, since the design of QUIC aims at easy extensibility, through other means like the proposed DATAGRAM extension of the protocol.
+In addition to application data, QUIC transfers might benefit from protecting control frames having a potential impact on the transmission throughput, such as MAX_DATA or MAX_STREAM_DATA frames.
+Therefore this document introduces an FEC protection across all -- or a subset of -- the frames of a given QUIC packet.
+This design choice impacts the QUIC packet to source symbols mapping, as well as signaling aspects, both of them being discussed hereafter.
 </t>
 
         </section>
+
 
         <section title="Source Symbol Definition">
         <!-- ====================== -->
 
 <t>
-We choose a packet-based source symbol definition that considers the sequence of frames (or a sub-sequence of them) transmitted through QUIC packets.
+The cross packet frames FEC encoding approach considers the sequence of frames (or a sub-sequence of them) transmitted within a given QUIC packet, seen as the QUIC packet payload.
+From this payload, it defines a mapping to source symbols (see <xref target="sec:pkt-payload-to-chunk"/> and <xref target="sec:chunk-to-src-symb"/>).
+Source symbols are then used for encoding purposes, producing one or more repair symbols, the details of which depend on the FEC Scheme considered.
+However source symbols are never sent per se on the network.
+Instead the original QUIC packet, plus a dedicated signaling header, are sent and therefore implicitely carry those source symbols.
+The QUIC packets, containing one or more repair symbols, are sent on the network.
 </t>
 
 <t>
-In order to facilitate experiments and enable backward compatibility, the frames protected by FEC encoding are kept unmodified.
-The only modification to QUIC packets carrying these frames is the addition of a dedicated TBD frame type, meant to carry signaling.
+The only modification to the original QUIC packet is the addition of a dedicated FEC_SRC_FPI frame type, meant to carry source symbol signaling (known as Source FEC Payload Information, or FPI).
 On the opposite, frames that carry one or more repair symbols use a dedicated REPAIR frame type.
-In both cases, the TBD and REPAIR frame types are chosen within the type range dedicated to "Extension Frames", thereby making a legacy receiver to automatically ignore these unknown frames.
+In both cases, in order to facilitate experiments and enable backward compatibility, the FEC_SRC_FPI and REPAIR frame types are chosen within the type range dedicated to "Extension Frames".
+Thereby, a legacy receiver will automatically ignore these unknown frame types.
 </t>
 
 
-                <section title="Packet Payload to Packet Chunk Mapping">
+                <section anchor="sec:pkt-payload-to-chunk" title="Packet Payload to Packet Chunk Mapping">
                 <!-- ====================== -->
 
 <t>
@@ -348,28 +353,27 @@ QUIC pkt 2 |Header| 0 |  Packet Payload   |         chunks 7, 8, 9
 
                 </section>
 
-                <section title="Packet Chunk to Source Symbol Mapping">
+                <section anchor="sec:chunk-to-src-symb" title="Packet Chunk to Source Symbol Mapping">
                 <!-- ====================== -->
 
 <t>
-We define source symbols as the concatenation of a single byte of metadata and one packet chunk.
-These source symbols are only used during encoding and decoding and are not sent as-is on the wire.
-<xref target="fig_ss_encoding"/> shows an example of 4 source symbols with their metadata.
+We define source symbols as the concatenation of a single byte of metadata and one packet chunk, for a total size of E bytes.
+These source symbols are only used during encoding and decoding and are not sent as-is on the network.
 </t>
 
-                    <figure anchor="fig_ss_encoding" title="Example of packet chunk to source symbol mapping, when the E value is relatively small.">
+                    <figure anchor="fig_ss_format" title="Source symbol format.">
                         <artwork><![CDATA[
-|< --E-- >|< --E-- >|< --E-- >|< --E-- >|
-| src symb| src symb| src symb| src symb|
-|         |         |         |         |
-+-+-------+-+-------+-+-------+-+-------+
-|0| chunk |1| chunk |1| chunk |2| chunk |
-+-+-------+-+-------+-+-------+-+-------+
+  1      E-1 bytes
+ +-+-----------------...--+
+ |P|                      |
+ +-+-----------------...--+
+meta   packet chunk
+data
                     ]]></artwork>
                     </figure>
+
 <t>
-The metadata consist in one byte at the beginning of each source symbol indicating the limits of the packet.
-The source symbol is thus of size E bytes.
+The metadata consist in one byte at the beginning of each source symbol indicating the position of the associated chunk within the QUIC packet.
 Hereunder are the possible values for the metadata byte and their meaning :
 <list style="symbols">
 <t>0: the source symbol contains the first chunk of the packet payload;</t>
@@ -378,23 +382,50 @@ Hereunder are the possible values for the metadata byte and their meaning :
 </list>
 </t>
 
+
+                    <figure anchor="fig_ss_encoding" title="Example of packet chunk to source symbol mapping, when the E value is relatively small.">
+                        <artwork><![CDATA[
+QUIC packet
+          |< E-1 >|< E-1 >|< E-1 >|< E-1 >|
+   +------|----+--|-------|-------|-------|
+   |Header| 0  |   Packet Payload         | 4 packet chunks
+   +------|----+--|-------|-------|-------|
+          /         |          |          \
+         v          v          v           v
++-+-------+  +-+-------+  +-+-------+  +-+-------+
+|0| chunk |  |1| chunk |  |1| chunk |  |2| chunk | 4 source symbols
++-+-------+  +-+-------+  +-+-------+  +-+-------+
+|         |  |         |  |         |  |         |
+|< --E-- >|  |< --E-- >|  |< --E-- >|  |< --E-- >|
+                    ]]></artwork>
+                    </figure>
+
+
 <t>
-Each source symbol is assigned source symbol ID allowing to determine unambiguously its position in the encoding window.
+<xref target="fig_ss_encoding"/> shows an example where the 4 source symbols are created from the payload of a given QUIC packet.
+The first chunk contains zero padding at the begining in order to align the protected packet payload size to a multiple of E-1.
 </t>
 
-                    <section title="Open questions: What to Put in Source Symbols Metadata?">
+
+<t>
+Each source symbol is uniquely identified allowing to determine unambiguously its position in the source symbol flow.
+What information to associate to a source symbol to uniquely identify it is FEC Scheme dependant.
+<xref target="sec:src_symb_signaling"/> gives insight on this topic.
+</t>
+
+                    <section title="Open questions: Content of Source Symbols Metadata?">
                     <!-- ====================== -->
 
 <t>
 <list hangIndent="4" style="hanging">
-	<t hangText="Note:"> Section to be removed once fixed.</t>
+	<t hangText="NB:"> section to remove once fixed.</t>
 </list>
 </t>
 
 <t>
-During the FEC encoding phase, additional data can be added to the source symbol. These data are only added during the encoding and MUST NOT be transmitted
-on the wire. The encoder and decoder MUST agree on the addition of these data to the source symbol in order to avoid decoding errors. Here are some examples
-of data that can be added to a source symbol during encoding and that will be decoded upon a source symbol recovery :
+During the FEC encoding phase, additional data can be added to the source symbol. These data are only added during the encoding and MUST NOT be transmitted on the network.
+The encoder and decoder MUST agree on the addition of these data to the source symbol in order to avoid decoding errors.
+Here are some examples of data that can be added to a source symbol during encoding and that will be decoded upon a source symbol recovery:
 
 <list style="symbols">
 	<t>
@@ -452,7 +483,7 @@ An appropriate balance should be found, and this choice is considered as out of 
 
         </section>
 
-        <section title="Source Symbol Signaling">
+        <section anchor="sec:src_symb_signaling" title="Source Symbol Signaling">
         <!-- ====================== -->
 
 <t>
@@ -464,13 +495,13 @@ This is out of the scope of this document. An example of identifier could be an 
 </t>
 
 <t>
-In order to announce the source symbol identifier to the FEC decoder, we propose to add a new frame, the TBD frame to packets whose payload will contain one or more source symbols from the FEC decoder point of view.
-The TBD frame is part of the packet payload itself.
-Any packet containing a TBD frame MUST see its payload considered as one or more source symbol(s).
+In order to announce the source symbol identifier to the FEC decoder, we propose to add a new frame, the FEC_SRC_FPI frame to packets whose payload will contain one or more source symbols from the FEC decoder point of view.
+The FEC_SRC_FPI frame is part of the packet payload itself.
+Any packet containing a FEC_SRC_FPI frame MUST see its payload considered as one or more source symbol(s).
 </t>
 
 <t>
-The TBD frame format is FEC Scheme specific and MUST be specified in the associated document.
+The FEC_SRC_FPI frame format is FEC Scheme specific and MUST be specified in the associated document.
 </t>
 
 
