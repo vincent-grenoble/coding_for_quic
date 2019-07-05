@@ -100,7 +100,7 @@
      <address>
        <postal>
          <street></street>
-         <city>Louvain</city>
+         <city>Louvain-la-Neuve</city>
          <region></region>
          <code></code>
          <country>Belgium</country>
@@ -443,8 +443,8 @@ Here are some examples of data that can be added to a source symbol during encod
 	</t>
 	<t>
 	Additional QUIC frames: the FEC encoder can for example add PADDING frames to a source symbol before proceeding to encoding. Adding PADDING frames
-	to source symbols before encoding allows protecting packets of different sizes. The smaller packet payload will be added PADDING frames to match the
-	size of the largest packet payload in the encoding window.
+	to source symbols before encoding allows protecting packets of different sizes. The smaller packet payload will be added PADDING frames to reach a size
+    that is a multiple of E-1.
 	</t>
 </list>
 

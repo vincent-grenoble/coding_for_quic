@@ -458,8 +458,8 @@ Internet-Draft               Coding for QUIC                   July 2019
       PADDING frames to a source symbol before proceeding to encoding.
       Adding PADDING frames to source symbols before encoding allows
       protecting packets of different sizes.  The smaller packet payload
-      will be added PADDING frames to match the size of the largest
-      packet payload in the encoding window.
+      will be added PADDING frames to reach a size that is a multiple of
+      E-1.
 
    Note:  Maybe the decision of adding data such as padding in the
        source symbols should be left to the underlying FEC Scheme.
@@ -755,29 +755,29 @@ Internet-Draft               Coding for QUIC                   July 2019
               transport/>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119, DOI 10.17487/
-              RFC2119, March 1997,
-              <http://www.rfc-editor.org/info/rfc2119>.
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997, <https://www.rfc-
+              editor.org/info/rfc2119>.
 
 9.2.  Informative References
 
-   [RFC5510]  Lacan, J., Roca, V., Peltotalo, J., and S. Peltotalo,
-              "Reed-Solomon Forward Error Correction (FEC) Schemes", RFC
-              5510, DOI 10.17487/RFC5510, April 2009, <https://www.rfc-
-              editor.org/info/rfc5510>.
-
-   [RLC]      Roca, V. and B. Teibi, "Sliding Window Random Linear Code
-              (RLC) Forward Erasure Correction (FEC) Scheme for
-              FECFRAME", Work in Progress, Transport Area Working Group
-              (TSVWG) draft-ietf-tsvwg-rlc-fec-scheme (Work in
-              Progress), June 2019, <https://tools.ietf.org/html/draft-
-              ietf-tsvwg-rlc-fec-scheme>.
-
    [nc-taxonomy]
               Roca (Ed.) et al., V., "Taxonomy of Coding Techniques for
-              Efficient Network Communications", Request For Comments
-              RFC 8406, June 2018, <https://datatracker.ietf.org/doc/
-              draft-irtf-nwcrg-network-coding-taxonomy/>.
+              Efficient Network Communications", Request For
+              Comments RFC 8406, June 2018,
+              <https://datatracker.ietf.org/doc/draft-irtf-nwcrg-
+              network-coding-taxonomy/>.
+
+   [RFC5510]  Lacan, J., Roca, V., Peltotalo, J., and S. Peltotalo,
+              "Reed-Solomon Forward Error Correction (FEC) Schemes",
+              RFC 5510, DOI 10.17487/RFC5510, April 2009,
+              <https://www.rfc-editor.org/info/rfc5510>.
+
+
+
+
+
+
 
 
 
@@ -785,6 +785,13 @@ Swett, et al.            Expires January 6, 2020               [Page 14]
 
 Internet-Draft               Coding for QUIC                   July 2019
 
+
+   [RLC]      Roca, V. and B. Teibi, "Sliding Window Random Linear Code
+              (RLC) Forward Erasure Correction (FEC) Scheme for
+              FECFRAME", Work in Progress, Transport Area Working Group
+              (TSVWG) draft-ietf-tsvwg-rlc-fec-scheme (Work in
+              Progress), June 2019, <https://tools.ietf.org/html/draft-
+              ietf-tsvwg-rlc-fec-scheme>.
 
 Authors' Addresses
 
@@ -814,17 +821,10 @@ Authors' Addresses
 
    Francois Michel
    UCLouvain
-   Louvain
+   Louvain-la-Neuve
    Belgium
 
    Email: francois.michel@uclouvain.be
-
-
-
-
-
-
-
 
 
 
