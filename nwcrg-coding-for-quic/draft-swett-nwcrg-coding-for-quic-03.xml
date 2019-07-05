@@ -282,7 +282,13 @@ This section does not define the FEC Scheme specific details that need to be spe
         <!-- ====================== -->
 
 <t>
-Application data can be transmitted through the QUIC stream abstraction, or, since the design of QUIC aims at easy extensibility, through other means like the proposed DATAGRAM extension of the protocol.
+A QUIC packet payload consists in a set of QUIC frames.
+These frames either carry application data (e.g., in a STREAM or DATAGRAM frame) or control information (e.g., a MAX_DATA frame).
+Each packet is either entirely received or lost, and is uniquely identified by a monotonically increasing Packet Number.
+</t>
+
+<t>
+Through the use of FEC encoding, application data can be protected proactively against packet losses, without requiring to go through packet retransmission.
 In addition to application data, QUIC transfers might benefit from protecting control frames having a potential impact on the transmission throughput, such as MAX_DATA or MAX_STREAM_DATA frames.
 Therefore this document introduces an FEC protection across all -- or a subset of -- the frames of a given QUIC packet.
 This design choice impacts the QUIC packet to source symbols mapping, as well as signaling aspects, both of them being discussed hereafter.
@@ -308,6 +314,7 @@ The only modification to the original QUIC packet is the addition of a dedicated
 On the opposite, frames that carry one or more repair symbols use a dedicated REPAIR frame type.
 In both cases, in order to facilitate experiments and enable backward compatibility, the FEC_SRC_FPI and REPAIR frame types are chosen within the type range dedicated to "Extension Frames".
 Thereby, a legacy receiver will automatically ignore these unknown frame types.
+As QUIC packets can be of different lengths, a special care must be taken to ensure having a fixed Source Symbol size to ease FEC Scheme implementations.
 </t>
 
 
@@ -315,19 +322,14 @@ Thereby, a legacy receiver will automatically ignore these unknown frame types.
                 <!-- ====================== -->
 
 <t>
-A QUIC packet payload consists in a set of QUIC frames. These frames either carry application data (e.g., STREAM or DATAGRAM frames) or control information (e.g., MAX_DATA frames).
-Each packet is either entirely received or lost and is uniquely identified by a monotonically increasing Packet Number.
-As QUIC packets can be of different lengths, a special care must be taken to ensure having a fixed Source Symbol size to ease FEC Scheme implementations.
+This section defines a mechanism to segment a QUIC packet payload, composed of several frames, into fixed-size payload chunks, of size E-1 bytes.
+Depending on the relative value of E-1 and the QUIC packet payload size, a packet can potentially contain more than one chunks.
+This is a first step into producing source symbols.
+<xref target="fig:frame-2-chunk-mapping"/> illustrates this process.
 </t>
 
 
-<t>
-<xref target="fig_frame_2_chunk_mapping"/> illustrates how QUIC packet payloads can be divided into fixed-size chunks to facilitate the encoding of the source symbols.
-Any chunk is of fixed size, E-1 bytes, leading a packet to potentially contain more than one chunk.
-</t>
-
-
-                    <figure anchor="fig_frame_2_chunk_mapping" title="Example of QUIC packet to chunk mapping, when the E-1 value is relatively small, with prepended zero padding when needed (here packets 1 and 2).">
+                    <figure anchor="fig:frame-2-chunk-mapping" title="Example of QUIC packet to chunk mapping, when the E-1 value is relatively small, with prepended zero padding when needed (here packets 1 and 2).">
                     <artwork><![CDATA[
                   |< E-1 >|< E-1 >|< E-1 >|< E-1 >|
                   |       |       |       |       |
@@ -341,27 +343,22 @@ QUIC pkt 2 |Header| 0 |  Packet Payload   |         chunks 7, 8, 9
                     ]]></artwork>
                     </figure>
 
-<t>
-<list hangIndent="4" style="hanging">
-    <t hangText="Note:">
-	We should take in account the fact that the repair payload will transit through a frame
-	and so maximum source symbol size must take this into account to avoid having REPAIR
-	frames that do not fit into a single packet.
-    </t>
-</list>
-</t>
 
                 </section>
 
                 <section anchor="sec:chunk-to-src-symb" title="Packet Chunk to Source Symbol Mapping">
                 <!-- ====================== -->
 
+<!--
 <t>
-We define source symbols as the concatenation of a single byte of metadata and one packet chunk, for a total size of E bytes.
+The second step consists in producing the source symbols.
+A source symbols is the concatenation of a single byte of metadata and a packet chunk (<xref target="fig:ss-format"/>).
+Each source symbol is of fixed-size E bytes.
 These source symbols are only used during encoding and decoding and are not sent as-is on the network.
 </t>
+-->
 
-                    <figure anchor="fig_ss_format" title="Source symbol format.">
+                    <figure anchor="fig:ss-format" title="Source symbol format.">
                         <artwork><![CDATA[
   1      E-1 bytes
  +-+-----------------...--+
@@ -372,18 +369,35 @@ data
                     ]]></artwork>
                     </figure>
 
+                    <figure anchor="fig:metadata-format" title="Source symbol metadata format.">
+                        <artwork><![CDATA[
+  7 6 5 4 3 2 1 0
+ +-+-+-+-+-+-+-+-+
+ | Resvd (0) |Pos|
+ +-+-+-+-+-+-+-+-+
+                    ]]></artwork>
+                    </figure>
+
+<!--
 <t>
-The metadata consist in one byte at the beginning of each source symbol indicating the position of the associated chunk within the QUIC packet.
-Hereunder are the possible values for the metadata byte and their meaning :
-<list style="symbols">
-<t>0: the source symbol contains the first chunk of the packet payload;</t>
-<t>1: the source symbol contains a chunk that is neither the first or the last chunk of the packet payload;</t>
-<t>2: the source symbol contains the last chunk of the packet payload</t>
+<xref target="fig:metadata-format"/> shows the format of the 1 byte metadata.
+The fields are the following:
+<list hangIndent="4" style="hanging">
+	<t hangText="Reserved field (6 bits):"> for this specification, this field MUST be equal to zero.</t>
+
+	<t hangText="Position field (2 bits):"> this field indicates the position of the chunk associated to this source symbol within the QUIC packet payload. 
+		The possible values are as follow:
+		<list style="symbols">
+		<t>0: the source symbol contains the first chunk of the packet payload;</t>
+		<t>1: the source symbol contains a chunk that is neither the first or the last chunk of the packet payload;</t>
+		<t>2: the source symbol contains the last chunk of the packet payload.</t>
+		</list>
+		</t>
 </list>
 </t>
+-->
 
-
-                    <figure anchor="fig_ss_encoding" title="Example of packet chunk to source symbol mapping, when the E value is relatively small.">
+                    <figure anchor="fig:ss-encoding" title="Example of packet chunk to source symbol mapping, when the E value is relatively small.">
                         <artwork><![CDATA[
 QUIC packet
           |< E-1 >|< E-1 >|< E-1 >|< E-1 >|
@@ -400,20 +414,20 @@ QUIC packet
                     ]]></artwork>
                     </figure>
 
-
+<!--
 <t>
-<xref target="fig_ss_encoding"/> shows an example where the 4 source symbols are created from the payload of a given QUIC packet.
+<xref target="fig:ss-encoding"/> shows an example where the 4 source symbols are created from the payload of a given QUIC packet.
 The first chunk contains zero padding at the begining in order to align the protected packet payload size to a multiple of E-1.
 </t>
-
 
 <t>
 Each source symbol is uniquely identified allowing to determine unambiguously its position in the source symbol flow.
 What information to associate to a source symbol to uniquely identify it is FEC Scheme dependant.
 <xref target="sec:src_symb_signaling"/> gives insight on this topic.
 </t>
+-->
 
-                    <section title="Open questions: Content of Source Symbols Metadata?">
+                    <section title="Open questions: Content of Source Symbols Metadata? Removing certain frames from FEC protection?">
                     <!-- ====================== -->
 
 <t>
@@ -459,6 +473,12 @@ This information might for example be encoded in the Source Symbol ID by the FEC
 
                     </section>
 
+<t>
+<list hangIndent="4" style="hanging">
+	<t hangText="TODO:"> add a mechanism to add QUIC packet identifier to the metadata.</t>
+</list>
+</t>
+
                 </section>
 
                 <section title="Source Symbol Size (E) Considerations">
@@ -473,10 +493,11 @@ This zero-padding, only used for FEC encoding, SHOULD NOT be sent on the wire.
 </t>
 
 <t>
-The choice of an appropriate value for E may depend on the use case (in particular on the nature of application data).
+The choice of an appropriate value for E may depends on the use case (in particular on the nature of application data).
 A reasonably small value reduces the expected value of the added padding needed to align the payload size with a multiple of E-1, which can be a good approach when dealing with QUIC packets whose size significantly vary.
 However an overly small value also increases processing complexity (FEC encoding and decoding are performed over a larger linear system since there are more source symbols), so there is an incentive to use a larger value.
 An appropriate balance should be found, and this choice is considered as out of scope for this document.
+Since a repair symbol will transit through a frame, the E value must take this into account to avoid having REPAIR frames that do not fit into a single QUIC packet.
 </t>
 
                 </section>
@@ -504,12 +525,22 @@ Any packet containing a FEC_SRC_FPI frame MUST see its payload considered as one
 The FEC_SRC_FPI frame format is FEC Scheme specific and MUST be specified in the associated document.
 </t>
 
-
         </section>
 
         <section title="Repair Symbol Signaling">
         <!-- ====================== -->
 
+<t>
+An explicit signaling is needed by a decoder for each repair symbol received through a REPAIR frame.
+The goals are manyfold: identifying the repair symbols and their position in the block (i.e., for block codes) or coding window (i.e., for sliding window codes);
+carrying information on the way this repair symbol has been produced (e.g., with sliding window codes, it can indicate the encoding window composition).
+</t>
+
+<t>
+One or more repair symbols can be present in a given QUIC packet.
+When there are multiple symbols, they SHOULD be concatenated in the same REPAIR frame.
+How to achieve this goal is FEC Scheme specific and therefore must be defined in the document describing this FEC Scheme.
+</t>
 
         </section>
 
@@ -517,18 +548,19 @@ The FEC_SRC_FPI frame format is FEC Scheme specific and MUST be specified in the
         <!-- ====================== -->
 
 <t>
-When source symbols are recovered, a QUIC receiver SHOULD advertise the symbols recoveries to the sender in order to avoid retransmission of already received data.
-The QUIC receiver MUST NOT acknowledge packets that have been recovered, as it would interfere with the behaviour of loss-based congestion controls such as <xref target="Cubic"/>.
+When all the source symbols of a given QUIC packet have been lost but are recovered during FEC decoding, a QUIC receiver SHOULD advertise it to the sender in order to avoid the retransmission of already available data.
+However, the QUIC receiver MUST NOT acknowledge this recovered packet through a regular acknowledement, as it would interfere with the behaviour of loss-based congestion controls such as <xref target="Cubic"/>.
+Therefore this document introduces a dedicated RECOVERED frame, that enables a receiver to indicate that a specific QUIC packet has been recovered through FEC decoding.
 </t>
 
 <t>
-<list hangIndent="4" style="hanging">
-	<t hangText="Note:"> Being able to signal a QUIC packet recovery requires to identify this packet.
-	Hence the question on adding the capability to recover this piece of information during FEC decoding.</t>
-</list>
+The RECOVERED frame works at the packet level.
+It is therefore required to be able to identify to which packet the recovered source symbols belong to.
+This is made possible by the QUIC packet identifier field added to the meta data prior to FEC encoding (<xref target="sec:chunk-to-src-symb"/>).
 </t>
 
-</section>
+        </section>
+
 
         <section title="About Gaps in the Set of Source Symbols Considered During Encoding">
         <!-- ====================== -->

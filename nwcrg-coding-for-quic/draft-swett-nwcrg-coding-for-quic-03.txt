@@ -80,7 +80,7 @@ Table of Contents
    3.  General Design Considerations . . . . . . . . . . . . . . . .   4
      3.1.  FEC Code versus FEC Scheme, Block Codes versus Sliding
            Window Codes  . . . . . . . . . . . . . . . . . . . . . .   4
-     3.2.  FEC Scheme Negotiation  . . . . . . . . . . . . . . . . .   4
+     3.2.  FEC Scheme Negotiation  . . . . . . . . . . . . . . . . .   5
      3.3.  FEC Protection Within an Encrypted Channel  . . . . . . .   5
      3.4.  About Middleboxes . . . . . . . . . . . . . . . . . . . .   5
    4.  FEC Protection Principles . . . . . . . . . . . . . . . . . .   5
@@ -89,23 +89,23 @@ Table of Contents
        4.2.1.  Packet Payload to Packet Chunk Mapping  . . . . . . .   6
        4.2.2.  Packet Chunk to Source Symbol Mapping . . . . . . . .   7
          4.2.2.1.  Open questions: Content of Source Symbols
-                   Metadata? . . . . . . . . . . . . . . . . . . . .   8
+                   Metadata? Removing certain frames from FEC
+                   protection? . . . . . . . . . . . . . . . . . . .   8
        4.2.3.  Source Symbol Size (E) Considerations . . . . . . . .   9
-     4.3.  Source Symbol Signaling . . . . . . . . . . . . . . . . .   9
+     4.3.  Source Symbol Signaling . . . . . . . . . . . . . . . . .  10
      4.4.  Repair Symbol Signaling . . . . . . . . . . . . . . . . .  10
-     4.5.  Signaling a Symbol Recovery . . . . . . . . . . . . . . .  10
+     4.5.  Signaling a Symbol Recovery . . . . . . . . . . . . . . .  11
      4.6.  About Gaps in the Set of Source Symbols Considered During
-           Encoding  . . . . . . . . . . . . . . . . . . . . . . . .  10
+           Encoding  . . . . . . . . . . . . . . . . . . . . . . . .  11
    5.  FEC Scheme Negotiation in QUIC  . . . . . . . . . . . . . . .  11
      5.1.  FEC Scheme Selection Process  . . . . . . . . . . . . . .  12
-     5.2.  FEC Scheme Configuration Information  . . . . . . . . . .  12
+     5.2.  FEC Scheme Configuration Information  . . . . . . . . . .  13
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
    7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
    8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  13
    9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  13
      9.1.  Normative References  . . . . . . . . . . . . . . . . . .  13
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .  13
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  14
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  14
 
 
 
@@ -113,6 +113,8 @@ Swett, et al.            Expires January 6, 2020                [Page 2]
 
 Internet-Draft               Coding for QUIC                   July 2019
 
+
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  14
 
 1.  Introduction
 
@@ -158,9 +160,7 @@ Internet-Draft               Coding for QUIC                   July 2019
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119].
 
-   Terms and definitions that apply to coding are available in
-   [nc-taxonomy].  More specifically, this document uses the following
-   definitions:
+
 
 
 
@@ -169,6 +169,10 @@ Swett, et al.            Expires January 6, 2020                [Page 3]
 
 Internet-Draft               Coding for QUIC                   July 2019
 
+
+   Terms and definitions that apply to coding are available in
+   [nc-taxonomy].  More specifically, this document uses the following
+   definitions:
 
    Packet versus Symbol:  a Packet is the unit of data that is exchanged
       over the network while a Symbol is the unit of data that is
@@ -210,13 +214,9 @@ Internet-Draft               Coding for QUIC                   July 2019
    FEC protection to QUIC, usually with an advantage for sliding window
    codes when it comes to low latency communications.
 
-3.2.  FEC Scheme Negotiation
 
-   There are multiple FEC Scheme candidates.  Therefore a negotiation
-   step is needed to select one or more codes to be used over a QUIC
-   session.  This will be implemented using the one step negotiation of
-   the new QUIC negotiation mechanism [QUIC-transport], during the QUIC
-   handshake.
+
+
 
 
 
@@ -225,6 +225,14 @@ Swett, et al.            Expires January 6, 2020                [Page 4]
 
 Internet-Draft               Coding for QUIC                   July 2019
 
+
+3.2.  FEC Scheme Negotiation
+
+   There are multiple FEC Scheme candidates.  Therefore a negotiation
+   step is needed to select one or more codes to be used over a QUIC
+   session.  This will be implemented using the one step negotiation of
+   the new QUIC negotiation mechanism [QUIC-transport], during the QUIC
+   handshake.
 
    Editor's notes:
 
@@ -263,17 +271,9 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 4.1.  Cross Packet Frames FEC Encoding
 
-   Application data can be transmitted through the QUIC stream
-   abstraction, or, since the design of QUIC aims at easy extensibility,
-   through other means like the proposed DATAGRAM extension of the
-   protocol.  In addition to application data, QUIC transfers might
-   benefit from protecting control frames having a potential impact on
-   the transmission throughput, such as MAX_DATA or MAX_STREAM_DATA
-   frames.  Therefore this document introduces an FEC protection across
-   all -- or a subset of -- the frames of a given QUIC packet.  This
-   design choice impacts the QUIC packet to source symbols mapping, as
-   well as signaling aspects, both of them being discussed hereafter.
-
+   A QUIC packet payload consists in a set of QUIC frames.  These frames
+   either carry application data (e.g., in a STREAM or DATAGRAM frame)
+   or control information (e.g., a MAX_DATA frame).  Each packet is
 
 
 
@@ -281,6 +281,20 @@ Swett, et al.            Expires January 6, 2020                [Page 5]
 
 Internet-Draft               Coding for QUIC                   July 2019
 
+
+   either entirely received or lost, and is uniquely identified by a
+   monotonically increasing Packet Number.
+
+   Through the use of FEC encoding, application data can be protected
+   proactively against packet losses, without requiring to go through
+   packet retransmission.  In addition to application data, QUIC
+   transfers might benefit from protecting control frames having a
+   potential impact on the transmission throughput, such as MAX_DATA or
+   MAX_STREAM_DATA frames.  Therefore this document introduces an FEC
+   protection across all -- or a subset of -- the frames of a given QUIC
+   packet.  This design choice impacts the QUIC packet to source symbols
+   mapping, as well as signaling aspects, both of them being discussed
+   hereafter.
 
 4.2.  Source Symbol Definition
 
@@ -304,32 +318,18 @@ Internet-Draft               Coding for QUIC                   July 2019
    experiments and enable backward compatibility, the FEC_SRC_FPI and
    REPAIR frame types are chosen within the type range dedicated to
    "Extension Frames".  Thereby, a legacy receiver will automatically
-   ignore these unknown frame types.
-
-4.2.1.  Packet Payload to Packet Chunk Mapping
-
-   A QUIC packet payload consists in a set of QUIC frames.  These frames
-   either carry application data (e.g., STREAM or DATAGRAM frames) or
-   control information (e.g., MAX_DATA frames).  Each packet is either
-   entirely received or lost and is uniquely identified by a
-   monotonically increasing Packet Number.  As QUIC packets can be of
+   ignore these unknown frame types.  As QUIC packets can be of
    different lengths, a special care must be taken to ensure having a
    fixed Source Symbol size to ease FEC Scheme implementations.
 
-   Figure 1 illustrates how QUIC packet payloads can be divided into
-   fixed-size chunks to facilitate the encoding of the source symbols.
-   Any chunk is of fixed size, E-1 bytes, leading a packet to
-   potentially contain more than one chunk.
+4.2.1.  Packet Payload to Packet Chunk Mapping
 
-
-
-
-
-
-
-
-
-
+   This section defines a mechanism to segment a QUIC packet payload,
+   composed of several frames, into fixed-size payload chunks, of size
+   E-1 bytes.  Depending on the relative value of E-1 and the QUIC
+   packet payload size, a packet can potentially contain more than one
+   chunks.  This is a first step into producing source symbols.
+   Figure 1 illustrates this process.
 
 
 
@@ -352,17 +352,13 @@ Internet-Draft               Coding for QUIC                   July 2019
     is relatively small, with prepended zero padding when needed (here
                              packets 1 and 2).
 
-   Note:  We should take in account the fact that the repair payload
-       will transit through a frame and so maximum source symbol size
-       must take this into account to avoid having REPAIR frames that do
-       not fit into a single packet.
-
 4.2.2.  Packet Chunk to Source Symbol Mapping
 
-   We define source symbols as the concatenation of a single byte of
-   metadata and one packet chunk, for a total size of E bytes.  These
-   source symbols are only used during encoding and decoding and are not
-   sent as-is on the network.
+   The second step consists in producing the source symbols.  A source
+   symbols is the concatenation of a single byte of metadata and a
+   packet chunk (Figure 2).  Each source symbol is of fixed-size E
+   bytes.  These source symbols are only used during encoding and
+   decoding and are not sent as-is on the network.
 
      1      E-1 bytes
     +-+-----------------...--+
@@ -373,18 +369,22 @@ Internet-Draft               Coding for QUIC                   July 2019
 
                       Figure 2: Source symbol format.
 
-   The metadata consist in one byte at the beginning of each source
-   symbol indicating the position of the associated chunk within the
-   QUIC packet.  Hereunder are the possible values for the metadata byte
-   and their meaning :
+     7 6 5 4 3 2 1 0
+    +-+-+-+-+-+-+-+-+
+    | Resvd (0) |Pos|
+    +-+-+-+-+-+-+-+-+
 
-   o  0: the source symbol contains the first chunk of the packet
-      payload;
+                 Figure 3: Source symbol metadata format.
 
-   o  1: the source symbol contains a chunk that is neither the first or
-      the last chunk of the packet payload;
+   Figure 3 shows the format of the 1 byte metadata.  The fields are the
+   following:
 
-   o  2: the source symbol contains the last chunk of the packet payload
+   Reserved field (6 bits):  for this specification, this field MUST be
+       equal to zero.
+
+   Position field (2 bits):  this field indicates the position of the
+       chunk associated to this source symbol within the QUIC packet
+       payload.  The possible values are as follow:
 
 
 
@@ -393,6 +393,15 @@ Swett, et al.            Expires January 6, 2020                [Page 7]
 
 Internet-Draft               Coding for QUIC                   July 2019
 
+
+       *  0: the source symbol contains the first chunk of the packet
+          payload;
+
+       *  1: the source symbol contains a chunk that is neither the
+          first or the last chunk of the packet payload;
+
+       *  2: the source symbol contains the last chunk of the packet
+          payload.
 
    QUIC packet
              |< E-1 >|< E-1 >|< E-1 >|< E-1 >|
@@ -407,10 +416,10 @@ Internet-Draft               Coding for QUIC                   July 2019
    |         |  |         |  |         |  |         |
    |< --E-- >|  |< --E-- >|  |< --E-- >|  |< --E-- >|
 
-   Figure 3: Example of packet chunk to source symbol mapping, when the
+   Figure 4: Example of packet chunk to source symbol mapping, when the
                        E value is relatively small.
 
-   Figure 3 shows an example where the 4 source symbols are created from
+   Figure 4 shows an example where the 4 source symbols are created from
    the payload of a given QUIC packet.  The first chunk contains zero
    padding at the begining in order to align the protected packet
    payload size to a multiple of E-1.
@@ -420,7 +429,8 @@ Internet-Draft               Coding for QUIC                   July 2019
    information to associate to a source symbol to uniquely identify it
    is FEC Scheme dependant.  Section 4.3 gives insight on this topic.
 
-4.2.2.1.  Open questions: Content of Source Symbols Metadata?
+4.2.2.1.  Open questions: Content of Source Symbols Metadata?  Removing
+          certain frames from FEC protection?
 
    NB: section to remove once fixed.
 
@@ -432,6 +442,14 @@ Internet-Draft               Coding for QUIC                   July 2019
    added to a source symbol during encoding and that will be decoded
    upon a source symbol recovery:
 
+
+
+
+Swett, et al.            Expires January 6, 2020                [Page 8]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
+
    o  The packet number: adding the packet number allows the decoder to
       know which packet has been recovered and potentially send a
       feedback of which packet has been recovered to the QUIC sender.
@@ -442,13 +460,6 @@ Internet-Draft               Coding for QUIC                   July 2019
       protecting packets of different sizes.  The smaller packet payload
       will be added PADDING frames to match the size of the largest
       packet payload in the encoding window.
-
-
-
-Swett, et al.            Expires January 6, 2020                [Page 8]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
 
    Note:  Maybe the decision of adding data such as padding in the
        source symbols should be left to the underlying FEC Scheme.
@@ -477,7 +488,7 @@ Internet-Draft               Coding for QUIC                   July 2019
    the payload.  This zero-padding, only used for FEC encoding, SHOULD
    NOT be sent on the wire.
 
-   The choice of an appropriate value for E may depend on the use case
+   The choice of an appropriate value for E may depends on the use case
    (in particular on the nature of application data).  A reasonably
    small value reduces the expected value of the added padding needed to
    align the payload size with a multiple of E-1, which can be a good
@@ -487,7 +498,17 @@ Internet-Draft               Coding for QUIC                   July 2019
    linear system since there are more source symbols), so there is an
    incentive to use a larger value.  An appropriate balance should be
    found, and this choice is considered as out of scope for this
-   document.
+
+
+
+Swett, et al.            Expires January 6, 2020                [Page 9]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
+
+   document.  Since a repair symbol will transit through a frame, the E
+   value must take this into account to avoid having REPAIR frames that
+   do not fit into a single QUIC packet.
 
 4.3.  Source Symbol Signaling
 
@@ -498,14 +519,6 @@ Internet-Draft               Coding for QUIC                   July 2019
    the position of a packet in the coding window as the packet number is
    not needed to increase by 1 for each new packet.  There is thus an
    ambiguity on the decoder-side between lost packets and packets that
-
-
-
-Swett, et al.            Expires January 6, 2020                [Page 9]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
    do not exist.  Similarly to FECFRAME, we propose to assign a
    identifier to source symbols to avoid this ambiguity.  This
    identifier is opaque to the protocol and will be defined by the
@@ -524,6 +537,30 @@ Internet-Draft               Coding for QUIC                   July 2019
    specified in the associated document.
 
 4.4.  Repair Symbol Signaling
+
+   An explicit signaling is needed by a decoder for each repair symbol
+   received through a REPAIR frame.  The goals are manyfold: identifying
+   the repair symbols and their position in the block (i.e., for block
+   codes) or coding window (i.e., for sliding window codes); carrying
+   information on the way this repair symbol has been produced (e.g.,
+   with sliding window codes, it can indicate the encoding window
+   composition).
+
+   One or more repair symbols can be present in a given QUIC packet.
+   When there are multiple symbols, they SHOULD be concatenated in the
+   same REPAIR frame.  How to achieve this goal is FEC Scheme specific
+   and therefore must be defined in the document describing this FEC
+   Scheme.
+
+
+
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 10]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
 
 4.5.  Signaling a Symbol Recovery
 
@@ -554,14 +591,6 @@ Internet-Draft               Coding for QUIC                   July 2019
    decoding complexity since there are fewer variables.  However this
    choice has major consequences in terms of signaling.  Indeed each
    repair symbol transmitted MUST be accompanied with enough information
-
-
-
-Swett, et al.            Expires January 6, 2020               [Page 10]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
    for the QUIC decoding endpoint to unambiguously identify the exact
    composition of the block or encoding window.  Without any gap, the
    identity of the first source symbol plus the number of symbols in the
@@ -579,6 +608,15 @@ Internet-Draft               Coding for QUIC                   July 2019
    o  Selecting a FEC Scheme (or FEC Schemes) that can be used by the
       QUIC transmission and reception endpoints.  This process requires
       an exchange between them;
+
+
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 11]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
 
    o  Communicating a certain number of parameters, the "Configuration
       Information", that are not expected to change over the session
@@ -610,18 +648,10 @@ Internet-Draft               Coding for QUIC                   July 2019
           a FEC Scheme on a QUIC session basis, therefore to be used for
           all the Streams that need FEC protection?
 
-
-
-
-Swett, et al.            Expires January 6, 2020               [Page 11]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
 5.1.  FEC Scheme Selection Process
 
    Let us consider the FEC Scheme selection process between the QUIC
-   endpoints.  Figure 4 illustrates the principle when a QUIC reception
+   endpoints.  Figure 5 illustrates the principle when a QUIC reception
    endpoint initiates the exchange.
 
    QUIC sender                                       QUIC receiver
@@ -633,8 +663,16 @@ Internet-Draft               Coding for QUIC                   July 2019
          - - - - - - - - - - - - - - - - - - - - - - >
          supported_fec_scheme_32b{FEC_Encoding_ID1 | other}
 
-    Figure 4: Example FEC Scheme selection process, during the initial
+    Figure 5: Example FEC Scheme selection process, during the initial
                                negotiation.
+
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 12]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
 
    The supported_fec_scheme_16b and supported_fec_scheme_32b are two new
    TransportParameterId to be added to the "Table 7: Initial QUIC
@@ -657,22 +695,12 @@ Internet-Draft               Coding for QUIC                   July 2019
 5.2.  FEC Scheme Configuration Information
 
    Let us now focus on the communication of configuration information
-   specific to the selected FEC Scheme.  In Figure 4, the
+   specific to the selected FEC Scheme.  In Figure 5, the
    supported_fec_scheme_32b{FS1_Encoding_ID} contains a field meant to
    carry the FEC Encoding ID of the FEC Scheme selected plus addditional
    configuration information if any.  If a 32 bit opaque field is not
    sufficient, the supported_fec_scheme_64b can be used instead and
    proposes a 64 bit opaque field.
-
-
-
-
-
-
-Swett, et al.            Expires January 6, 2020               [Page 12]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
 
 6.  Security Considerations
 
@@ -694,6 +722,13 @@ Internet-Draft               Coding for QUIC                   July 2019
               R. Scheffenegger, "CUBIC for Fast Long-Distance Networks",
               RFC 8312, DOI 10.17487/RFC8312, February 2018,
               <https://www.rfc-editor.org/info/rfc8312>.
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 13]
+
+Internet-Draft               Coding for QUIC                   July 2019
+
 
    [QUIC-transport]
               Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
@@ -721,15 +756,6 @@ Internet-Draft               Coding for QUIC                   July 2019
               Progress), February 2019, <https://tools.ietf.org/html/
               draft-ietf-tsvwg-rlc-fec-scheme>.
 
-
-
-
-
-Swett, et al.            Expires January 6, 2020               [Page 13]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
    [nc-taxonomy]
               Roca (Ed.) et al., V., "Taxonomy of Coding Techniques for
               Efficient Network Communications", Request For Comments
@@ -752,6 +778,12 @@ Authors' Addresses
    US
 
    Email: marie@mjmontpetit.com
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 14]
+
+Internet-Draft               Coding for QUIC                   July 2019
 
 
    Vincent Roca
@@ -781,4 +813,28 @@ Authors' Addresses
 
 
 
-Swett, et al.            Expires January 6, 2020               [Page 14]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Swett, et al.            Expires January 6, 2020               [Page 15]
