@@ -329,9 +329,9 @@ This is a first step into producing source symbols.
 </t>
 
 
-                    <figure anchor="fig:frame-2-chunk-mapping" title="Example of QUIC packet to chunk mapping, when the E-1 value is relatively small, with prepended zero padding when needed (here packets 1 and 2).">
+                    <figure anchor="fig:frame-2-chunk-mapping" title="Example of QUIC packet to chunk mapping, when the E-1 value is relatively small, with prepended zero padding when needed (here packets 1 and 2), and assuming the first chunk contains the QUIC Packet Number in 4 bytes compressed version (see next section).">
                     <artwork><![CDATA[
-                  |< E-1 >|< E-1 >|< E-1 >|< E-1 >|
+                  |<E-1-4>|< E-1 >|< E-1 >|< E-1 >|
                   |       |       |       |       |
            +------|-------|-------|-------|-------|
 QUIC pkt 0 |Header|      Packet Payload           | chunks 0, 1, 2, 3
@@ -351,28 +351,47 @@ QUIC pkt 2 |Header| 0 |  Packet Payload   |         chunks 7, 8, 9
 
 <t>
 The second step consists in producing the source symbols.
-A source symbols is the concatenation of a single byte of metadata and a packet chunk (<xref target="fig:ss-format"/>).
+A source symbols is the concatenation of a single byte of metadata, potentially followed by the Packet Number of the associated source, plus a packet chunk.
+<xref target="fig:ss-format-with-pkt-number"/> illustrates the situation where a compressed QUIC packet number is added (in general for the first chunk of a QUIC packet).
+<xref target="fig:ss-format-wo-pkt-number"/> illustrates the situation where there is no QUIC packet number (in general for the following chunk(s) of a QUIC packet).
+When the QUIC packet number is present, this identifier can be recovered by a receiver after successful FEC decoding. 
+It means that a RECOVERED frame can be generated to the sender to indicated that this packet (identified by the QUIC packet number) has been recovered.
 Each source symbol is of fixed-size E bytes.
 These source symbols are only used during encoding and decoding and are not sent as-is on the network.
 </t>
 
-                    <figure anchor="fig:ss-format" title="Source symbol format.">
+                    <figure anchor="fig:ss-format-with-pkt-number" title="Source symbol format with Packet Number information (e.g., first packet chunk).">
                         <artwork><![CDATA[
-  1      E-1 bytes
- +-+-----------------...--+
- |P|                      |
- +-+-----------------...--+
-meta   packet chunk
-data
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+
+|  meta data    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Packet Number (4 bytes)                  ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Packet chunk (E-1-4 bytes)               ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                    ]]></artwork>
+                    </figure>
+
+                    <figure anchor="fig:ss-format-wo-pkt-number" title="Source symbol format without Packet Number information (e.g., packet chunks except the first one).">
+                        <artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+
+|  meta data    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Packet chunk (E-1-4 bytes)               ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                     ]]></artwork>
                     </figure>
 
                     <figure anchor="fig:metadata-format" title="Source symbol metadata format.">
                         <artwork><![CDATA[
-  7 6 5 4 3 2 1 0
- +-+-+-+-+-+-+-+-+
- | Resvd (0) |Pos|
- +-+-+-+-+-+-+-+-+
+ 7 6 5 4 3 2 1 0
++-+-+-+-+-+-+-+-+
+|Resvd (0)|N|S|E|
++-+-+-+-+-+-+-+-+
                     ]]></artwork>
                     </figure>
 
@@ -380,17 +399,17 @@ data
 <xref target="fig:metadata-format"/> shows the format of the 1 byte metadata.
 The fields are the following:
 <list hangIndent="4" style="hanging">
-	<t hangText="Reserved field (6 bits):"> for this specification, this field MUST be equal to zero.</t>
+	<t hangText="Reserved field (5 bits):"> for this specification, this field MUST be equal to zero.</t>
 
-	<t hangText="Position field (2 bits):"> this field indicates the position of the chunk associated to this source symbol within the QUIC packet payload. 
-		The possible values are as follow:
-		<list style="symbols">
-		<t>0: the source symbol contains the first chunk of the packet payload;</t>
-		<t>1: the source symbol contains a chunk that is neither the first or the last chunk of the packet payload;</t>
-		<t>2: the source symbol contains the last chunk of the packet payload.</t>
-		</list>
-		</t>
+	<t hangText="Packet Number (N) field (1 bit):"> this field indicates that the following 4 bytes contain the Packet Number (short 32-bit representation) of the associated QUIC packet
+		(<xref target="QUIC-transport"/> section 17.1., Packet Number Encoding and Decoding).</t>
+
+	<t hangText="Start (S) bit (1 bit):"> this field, when set to 1, indicates that this source symbol contains the first chunk of the packet payload.</t>
+
+	<t hangText="End bit (E) (1 bit):"> this field, when set to 1, indicates that this source symbol contains the last chunk of the packet payload.</t>
 </list>
+Note that with a QUIC packet containing a single chunk, the associated metadata will contain S=E=1.
+On the opposite, a source symbol containing a intermediate chunk (i.e., neither the first nor the last chunk of the QUIC packet), the associated metadata will contain S=E=0.
 </t>
 
                     <figure anchor="fig:ss-encoding" title="Example of packet chunk to source symbol mapping, when the E value is relatively small.">
@@ -398,13 +417,13 @@ The fields are the following:
 QUIC packet
           |< E-1 >|< E-1 >|< E-1 >|< E-1 >|
    +------|----+--|-------|-------|-------|
-   |Header| 0  |   Packet Payload         | 4 packet chunks
+   |Header| 0  |pn Packet Payload         | 4 packet chunks
    +------|----+--|-------|-------|-------|
           /         |          |          \
          v          v          v           v
-+-+-------+  +-+-------+  +-+-------+  +-+-------+
-|0| chunk |  |1| chunk |  |1| chunk |  |2| chunk | 4 source symbols
-+-+-------+  +-+-------+  +-+-------+  +-+-------+
++-+--+----+  +-+-------+  +-+-------+  +-+-------+
+|0|pn|chnk|  |1|  chunk|  |1|  chunk|  |2|  chunk| 4 source symbols
++-+--+----+  +-+-------+  +-+-------+  +-+-------+
 |         |  |         |  |         |  |         |
 |< --E-- >|  |< --E-- >|  |< --E-- >|  |< --E-- >|
                     ]]></artwork>
