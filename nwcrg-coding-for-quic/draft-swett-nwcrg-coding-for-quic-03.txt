@@ -326,10 +326,10 @@ Internet-Draft               Coding for QUIC                   July 2019
 
    This section defines a mechanism to segment a QUIC packet payload,
    composed of several frames, into fixed-size payload chunks, of size
-   E-1 bytes.  Depending on the relative value of E-1 and the QUIC
-   packet payload size, a packet can potentially contain more than one
-   chunks.  This is a first step into producing source symbols.
-   Figure 1 illustrates this process.
+   E-1 bytes or E-1-4 bytes for the first chunk when the QUIC Packet
+   Number needs to be added ((Section 4.2.2).  Depending on the relative
+   value of E-1 (or E-1-4) and the QUIC packet payload size, a packet
+
 
 
 
@@ -337,6 +337,9 @@ Swett, et al.            Expires January 9, 2020                [Page 6]
 
 Internet-Draft               Coding for QUIC                   July 2019
 
+
+   can potentially contain more than one chunks.  This is a first step
+   into producing source symbols.  Figure 1 illustrates this process.
 
                      |<E-1-4>|< E-1 >|< E-1 >|< E-1 >|
                      |       |       |       |       |
@@ -351,7 +354,7 @@ Internet-Draft               Coding for QUIC                   July 2019
    Figure 1: Example of QUIC packet to chunk mapping, when the E-1 value
     is relatively small, with prepended zero padding when needed (here
      packets 1 and 2), and assuming the first chunk contains the QUIC
-      Packet Number in 4 bytes compressed version (see next section).
+               Packet Number in 4 bytes compressed version.
 
 4.2.2.  Packet Chunk to Source Symbol Mapping
 
@@ -375,16 +378,13 @@ Internet-Draft               Coding for QUIC                   July 2019
    +-+-+-+-+-+-+-+-+
    |  meta data    |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    Packet Number (4 bytes)                  ...
+   |                    Packet Number (4 bytes)                    |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                    Packet chunk (E-1-4 bytes)               ...
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
    Figure 2: Source symbol format with Packet Number information (e.g.,
                            first packet chunk).
-
-
-
 
 
 
@@ -399,7 +399,7 @@ Internet-Draft               Coding for QUIC                   July 2019
    +-+-+-+-+-+-+-+-+
    |  meta data    |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    Packet chunk (E-1-4 bytes)               ...
+   |                    Packet chunk (E-1 bytes)               ...
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
      Figure 3: Source symbol format without Packet Number information
@@ -451,25 +451,27 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
    QUIC packet
-             |< E-1 >|< E-1 >|< E-1 >|< E-1 >|
+             |<E-1-4>|< E-1 >|< E-1 >|< E-1 >|
       +------|----+--|-------|-------|-------|
-      |Header| 0  |pn Packet Payload         | 4 packet chunks
+      |Header| 0  |   Packet Payload         | 4 packet chunks
       +------|----+--|-------|-------|-------|
              /         |          |          \
             v          v          v           v
    +-+--+----+  +-+-------+  +-+-------+  +-+-------+
-   |0|pn|chnk|  |1|  chunk|  |1|  chunk|  |2|  chunk| 4 source symbols
+   |m|pn|chnk|  |m|  chunk|  |m|  chunk|  |m|  chunk| 4 source symbols
    +-+--+----+  +-+-------+  +-+-------+  +-+-------+
    |         |  |         |  |         |  |         |
    |< --E-- >|  |< --E-- >|  |< --E-- >|  |< --E-- >|
 
    Figure 5: Example of packet chunk to source symbol mapping, when the
-                       E value is relatively small.
+    E value is relatively small, in presence of the QUIC Packet Number
+                           for the first chunk.
 
    Figure 5 shows an example where the 4 source symbols are created from
-   the payload of a given QUIC packet.  The first chunk contains zero
+   the payload of a given QUIC packet.  The first chunk may contain zero
    padding at the begining in order to align the protected packet
-   payload size to a multiple of E-1.
+   payload size to a multiple of E-1, and the first source symbol may
+   contain the QUIC Packet Number.
 
    Each source symbol is uniquely identified allowing to determine
    unambiguously its position in the source symbol flow.  What
@@ -496,8 +498,6 @@ Internet-Draft               Coding for QUIC                   July 2019
    o  Additional QUIC frames: the FEC encoder can for example add
       PADDING frames to a source symbol before proceeding to encoding.
       Adding PADDING frames to source symbols before encoding allows
-      protecting packets of different sizes.  The smaller packet payload
-
 
 
 
@@ -506,6 +506,7 @@ Swett, et al.            Expires January 9, 2020                [Page 9]
 Internet-Draft               Coding for QUIC                   July 2019
 
 
+      protecting packets of different sizes.  The smaller packet payload
       will be added PADDING frames to reach a size that is a multiple of
       E-1.
 
@@ -552,7 +553,6 @@ Internet-Draft               Coding for QUIC                   July 2019
    document.  Since a repair symbol will transit through a frame, the E
    value must take this into account to avoid having REPAIR frames that
    do not fit into a single QUIC packet.
-
 
 
 
