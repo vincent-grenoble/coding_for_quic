@@ -93,11 +93,11 @@
    </author>
 
    <author fullname="Francois Michel" initials="F." surname="Michel">
-     <organization>UC Louvain</organization>
+     <organization>UCLouvain</organization>
      <address>
        <postal>
          <street></street>
-         <city>Louvain</city>
+         <city>Louvain-la-Neuve</city>
          <region></region>
          <code></code>
          <country>Belgium</country>
@@ -129,14 +129,14 @@ This document specifies Sliding Window Random Linear Code (RLC) Forward Erasure 
 	<!-- ====================== -->
 
 <t>
-QUIC <xref target="QUIC-transport"/> is a new transport that aims at improving network performance by enabling out of order delivery, partial reliability, and methods of recovery besides retransmission, while also improving security.
+QUIC <xref target="QUIC-transport"/> is a transport protocol that aims at improving network performance by enabling stream multiplexing, partial reliability, and methods of recovery besides retransmission, while also improving security.
 This document specifies FEC schemes for Sliding Window Random Linear Code (RLC) <xref target="RLC"/> to recover from lost packets within a single QUIC stream or across several QUIC streams, compliant with the FEC coding framework for QUIC <xref target="Coding4QUIC"/>.
 </t>
 
 <t>
 The ability to add FEC coding in QUIC may be beneficial in several situations:
 <list style="symbols">
-	<t>for a robust transmission of latency sensitive traffic, for instance real-time flows, since it enables to recover packet losses independently of the round trip time;</t>
+	<t>for a robust transmission of latency-sensitive traffic, for instance real-time flows, since it enables to recover packet losses independently of the round trip time;</t>
 	<t>for the transmission of contents to a large set of QUIC reception endpoints, since the same repair frame may help recovering several different packet losses at different receivers;</t>
 	<t>for multipath communications, since repair traffic adds diversity.</t>
 </list>
@@ -190,18 +190,41 @@ The present FEC Scheme follows the source symbols mapping specified in <xref tar
 
 <figure anchor="fig_frame_2_ss_mapping" title="Example of source symbol mapping, when the E value is relatively small.">
         <artwork><![CDATA[
- < -E- > < -E- > < -E- > < -E- >
-+-------+-------+-------+-------+
-|< -- Frame 1 -- >< ----- Frame |  source symbols 0, 1, 2, 3
-+-------+-------+-------+-------+
-| 2 ----- >< --- Frame 3 -- >< -|  source symbols 4, 5, 6, 7
-+-------+-------+----+--+-------+
-| Frame 4 - >< -F5- >|             source symbols 8, 9 and 10
-+-------+-------+----+             (incomplete)
+QUIC packet
+         |<E-1-4>|< E-1 >|< E-1 >|< E-1 >|
+  +------|----+--|-------|-------|-------|
+  |Header| 0  |   Packet Payload         | 4 packet chunks
+  +------|----+--|-------|-------|-------|
+         /         |          |          \
+        v          v          v           v
++-+--+----+  +-+-------+  +-+-------+  +-+-------+
+|m|pn|chnk|  |m|  chunk|  |m|  chunk|  |m|  chunk| 4 source symbols
++-+--+----+  +-+-------+  +-+-------+  +-+-------+
+|         |  |         |  |         |  |         |
+|< --E-- >|  |< --E-- >|  |< --E-- >|  |< --E-- >|
 ]]></artwork>
 </figure>
 
 	</section>
+
+	<section  anchor="CommonProc_id" title="Source Symbols identification">
+		<t>
+		Similarly to <xref target="RLC"/>, the present FEC Scheme assigns a unique identifier (ID) to each produced source symbol. The IDs are assigned to the
+		produced source symbols in the ascending order. The IDs start at MUST start 0 and MUST be contiguous. For any symbol
+		with ID x, the source symbol with ID x+1 is :
+		</t>
+		<t>
+			<list style="symbols">
+				<t>The source symbol containing the next packet chunk in the same QUIC packet as the source symbol X, if it exists.</t>
+
+				<t>The source symbol containing the first packet chunk of the next generated FEC-protected QUIC packet</t>
+			</list>
+		</t>
+		<t hangText="Note:"> Do we want to authorize a wrapping of the source symbol ID ? It would be a lot easier if wrapping is not permitted.
+		</t>
+	</section>
+
+
 
 	<section  anchor="CommonProc_prng" title="Pseudo-Random Number Generator (PRNG)">
 	<!-- ====================== -->
@@ -279,7 +302,7 @@ is protected by FEC MUST contain an SRC FPI frame with the following format.
 			</figure>
 <t>
 
-	The SRC FPI frame contains the ID if the first source symbol contained in this packet. Each source symbol contains a packet chunk of E-1 bytes long.
+	The SRC FPI frame contains the ID of the first source symbol contained in this packet. Each source symbol contains a packet chunk of E-1 bytes long.
 	If the payload to protect is longer than E-1 bytes, this means that the packet contains several packet chunks. In this case the source symbol ID
 	will increase by exactly one for each additional packet chunk contained in the payload to protect.
 	<list hangIndent="4" style="hanging">
@@ -288,7 +311,7 @@ is protected by FEC MUST contain an SRC FPI frame with the following format.
 			in the frame, but it takes a lot of space and I don't think it is very useful).
 			Another bad property is that the frames are not independant anymore (several SRC FPI frames contained in the same packet have a confusing meaning).
 
-			I really think that the correct solution would be a (encrypted) header field but I guess it is more complicated to push (maybe in v2 we'll have
+			I really think that the correct solution would be a (encrypted) header field but I guess it is more complicated to propose (maybe in v2 we'll have
 			a mechanism to define dynamic encrypted header fields during negotiation).
 		</t>
 	</list>
@@ -320,8 +343,8 @@ Note that the notion of REPAIR frame format is equivalent to the notion of Repai
 <t>
 More precisely, the REPAIR frame format is composed of the following fields (<xref target="fig_repair_frame_format"/>):
 <list style="hanging">
-<t hangText="Offset of First Source Symbol in the Encoding Window (variable-size field):">
-	a variable-length integer specifying the byte offset in the stream for the first source symbol of the encoding window.
+<t hangText="ID of the first Source Symbol in the Encoding Window (variable-size field):">
+	a variable-length integer specifying the ID of the first source symbol in the encoding window.
 	When a FEC REPAIR frame contains several repair symbols, this value applies to all of them;</t>
 
 <t hangText="Repair_Key (16-bit field):">
@@ -347,15 +370,8 @@ More precisely, the REPAIR frame format is composed of the following fields (<xr
 	data for this repair symbol(s). This field is NRS*E bytes long.</t>
 </list>
 
-<list hangIndent="4" style="hanging">
-	<t hangText="Note:"> TODO: see if it makes sense to have an encoding space smaller for NRS than for NSS. Maybe should we just put varint fields instead. </t>
-</list>
-
 </t>
 
-
-			<section title="RECOVERED Frame Format">
-			</section>
 
 		</section>
 

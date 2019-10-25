@@ -5,12 +5,12 @@
 nwcrg                                                            V. Roca
 Internet-Draft                                                     INRIA
 Intended status: Informational                                  I. Swett
-Expires: April 17, 2020                                           Google
+Expires: April 27, 2020                                           Google
                                                           M-J. Montpetit
                                                           Triangle Video
                                                                F. Michel
-                                                              UC Louvain
-                                                        October 15, 2019
+                                                               UCLouvain
+                                                        October 25, 2019
 
 
 Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC)
@@ -38,7 +38,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 17, 2020.
+   This Internet-Draft will expire on April 27, 2020.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Roca, et al.             Expires April 17, 2020                 [Page 1]
+Roca, et al.             Expires April 27, 2020                 [Page 1]
 
 Internet-Draft                RLC for QUIC                  October 2019
 
@@ -69,30 +69,30 @@ Table of Contents
    2.  Definitions and Abbreviations . . . . . . . . . . . . . . . .   3
    3.  Procedures  . . . . . . . . . . . . . . . . . . . . . . . . .   3
      3.1.  Source Symbols Mapping  . . . . . . . . . . . . . . . . .   3
-     3.2.  Pseudo-Random Number Generator (PRNG) . . . . . . . . . .   4
-     3.3.  Coding Coefficients Generation Function . . . . . . . . .   4
-   4.  Sliding Window RLC FEC Scheme over GF(2^^8) . . . . . . . . .   4
-     4.1.  Formats and Codes . . . . . . . . . . . . . . . . . . . .   4
-       4.1.1.  Configuration Information . . . . . . . . . . . . . .   4
+     3.2.  Source Symbols identification . . . . . . . . . . . . . .   4
+     3.3.  Pseudo-Random Number Generator (PRNG) . . . . . . . . . .   4
+     3.4.  Coding Coefficients Generation Function . . . . . . . . .   4
+   4.  Sliding Window RLC FEC Scheme over GF(2^^8) . . . . . . . . .   5
+     4.1.  Formats and Codes . . . . . . . . . . . . . . . . . . . .   5
+       4.1.1.  Configuration Information . . . . . . . . . . . . . .   5
        4.1.2.  SRC FPI Frame Format  . . . . . . . . . . . . . . . .   5
-       4.1.3.  REPAIR Frame Format . . . . . . . . . . . . . . . . .   5
-         4.1.3.1.  RECOVERED Frame Format  . . . . . . . . . . . . .   7
+       4.1.3.  REPAIR Frame Format . . . . . . . . . . . . . . . . .   6
        4.1.4.  Additional Procedures . . . . . . . . . . . . . . . .   7
      4.2.  FEC Code Specification  . . . . . . . . . . . . . . . . .   7
        4.2.1.  Encoding Side . . . . . . . . . . . . . . . . . . . .   7
        4.2.2.  Decoding Side . . . . . . . . . . . . . . . . . . . .   7
    5.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
-   7.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   7
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
+   7.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   8
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .   8
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .   9
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
 
 1.  Introduction
 
-   QUIC [QUIC-transport] is a new transport that aims at improving
-   network performance by enabling out of order delivery, partial
+   QUIC [QUIC-transport] is a transport protocol that aims at improving
+   network performance by enabling stream multiplexing, partial
    reliability, and methods of recovery besides retransmission, while
    also improving security.  This document specifies FEC schemes for
    Sliding Window Random Linear Code (RLC) [RLC] to recover from lost
@@ -102,14 +102,14 @@ Table of Contents
    The ability to add FEC coding in QUIC may be beneficial in several
    situations:
 
-   o  for a robust transmission of latency sensitive traffic, for
+   o  for a robust transmission of latency-sensitive traffic, for
       instance real-time flows, since it enables to recover packet
       losses independently of the round trip time;
 
 
 
 
-Roca, et al.             Expires April 17, 2020                 [Page 2]
+Roca, et al.             Expires April 27, 2020                 [Page 2]
 
 Internet-Draft                RLC for QUIC                  October 2019
 
@@ -165,36 +165,66 @@ Internet-Draft                RLC for QUIC                  October 2019
 
 
 
-Roca, et al.             Expires April 17, 2020                 [Page 3]
+Roca, et al.             Expires April 27, 2020                 [Page 3]
 
 Internet-Draft                RLC for QUIC                  October 2019
 
 
-    < -E- > < -E- > < -E- > < -E- >
-   +-------+-------+-------+-------+
-   |< -- Frame 1 -- >< ----- Frame |  source symbols 0, 1, 2, 3
-   +-------+-------+-------+-------+
-   | 2 ----- >< --- Frame 3 -- >< -|  source symbols 4, 5, 6, 7
-   +-------+-------+----+--+-------+
-   | Frame 4 - >< -F5- >|             source symbols 8, 9 and 10
-   +-------+-------+----+             (incomplete)
+   QUIC packet
+            |<E-1-4>|< E-1 >|< E-1 >|< E-1 >|
+     +------|----+--|-------|-------|-------|
+     |Header| 0  |   Packet Payload         | 4 packet chunks
+     +------|----+--|-------|-------|-------|
+            /         |          |          \
+           v          v          v           v
+   +-+--+----+  +-+-------+  +-+-------+  +-+-------+
+   |m|pn|chnk|  |m|  chunk|  |m|  chunk|  |m|  chunk| 4 source symbols
+   +-+--+----+  +-+-------+  +-+-------+  +-+-------+
+   |         |  |         |  |         |  |         |
+   |< --E-- >|  |< --E-- >|  |< --E-- >|  |< --E-- >|
 
       Figure 1: Example of source symbol mapping, when the E value is
                              relatively small.
 
-3.2.  Pseudo-Random Number Generator (PRNG)
+3.2.  Source Symbols identification
+
+   Similarly to [RLC], the present FEC Scheme assigns a unique
+   identifier (ID) to each produced source symbol.  The IDs are assigned
+   to the produced source symbols in the ascending order.  The IDs start
+   at MUST start 0 and MUST be contiguous.  For any symbol with ID x,
+   the source symbol with ID x+1 is :
+
+   o  The source symbol containing the next packet chunk in the same
+      QUIC packet as the source symbol X, if it exists.
+
+   o  The source symbol containing the first packet chunk of the next
+      generated FEC-protected QUIC packet
+
+   Do we want to authorize a wrapping of the source symbol ID ? It would
+   be a lot easier if wrapping is not permitted.
+
+3.3.  Pseudo-Random Number Generator (PRNG)
 
    The RLC FEC Schemes defined in this document rely on the TinyMT32
    PRNG defined in [tinymt32] along with the two mapping functions to
    4-bit and 8-bit unsigned integers defined in [RLC].
 
-3.3.  Coding Coefficients Generation Function
+3.4.  Coding Coefficients Generation Function
 
    The coding coefficients, used during the encoding process, are
    generated at the RLC encoder by the generate_coding_coefficients()
    function each time a new repair symbol needs to be produced.  This
    specification uses the generate_coding_coefficients() defined in
    [RLC].
+
+
+
+
+
+Roca, et al.             Expires April 27, 2020                 [Page 4]
+
+Internet-Draft                RLC for QUIC                  October 2019
+
 
 4.  Sliding Window RLC FEC Scheme over GF(2^^8)
 
@@ -217,15 +247,6 @@ Internet-Draft                RLC for QUIC                  October 2019
    o  Encoding symbol size, E (in bytes) (16 bits): a non-negative
       integer that indicates the size of each source and repair symbol,
       in bytes.  This element is required both by the QUIC sender
-
-
-
-
-Roca, et al.             Expires April 17, 2020                 [Page 4]
-
-Internet-Draft                RLC for QUIC                  October 2019
-
-
       endpoint (RLC encoder) and the QUIC receiver endpoint(s) (RLC
       decoder).
 
@@ -246,12 +267,20 @@ Internet-Draft                RLC for QUIC                  October 2019
 
                       Figure 2: SRC FPI frame format.
 
-   The SRC FPI frame contains the ID if the first source symbol
+   The SRC FPI frame contains the ID of the first source symbol
    contained in this packet.  Each source symbol contains a packet chunk
    of E-1 bytes long.  If the payload to protect is longer than E-1
    bytes, this means that the packet contains several packet chunks.  In
    this case the source symbol ID will increase by exactly one for each
    additional packet chunk contained in the payload to protect.
+
+
+
+
+Roca, et al.             Expires April 27, 2020                 [Page 5]
+
+Internet-Draft                RLC for QUIC                  October 2019
+
 
    Note:  This frame is not idempotent.  In the current version of QUIC,
        all the frames are idempotent (but this is not especially
@@ -262,7 +291,7 @@ Internet-Draft                RLC for QUIC                  October 2019
        SRC FPI frames contained in the same packet have a confusing
        meaning).  I really think that the correct solution would be a
        (encrypted) header field but I guess it is more complicated to
-       push (maybe in v2 we'll have a mechanism to define dynamic
+       propose (maybe in v2 we'll have a mechanism to define dynamic
        encrypted header fields during negotiation).
 
 4.1.3.  REPAIR Frame Format
@@ -271,16 +300,6 @@ Internet-Draft                RLC for QUIC                  October 2019
    information.  This section specifies the REPAIR frame format specific
    to the RLC FEC Scheme.  Note that the notion of REPAIR frame format
    is equivalent to the notion of Repair FEC Payload ID in [RLC].
-
-
-
-
-
-
-Roca, et al.             Expires April 17, 2020                 [Page 5]
-
-Internet-Draft                RLC for QUIC                  October 2019
-
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -297,20 +316,27 @@ Internet-Draft                RLC for QUIC                  October 2019
    More precisely, the REPAIR frame format is composed of the following
    fields (Figure 3):
 
-   Offset of First Source Symbol in the Encoding Window (variable-size
+   ID of the first Source Symbol in the Encoding Window (variable-size
    field):
-      a variable-length integer specifying the byte offset in the stream
-      for the first source symbol of the encoding window.  When a FEC
-      REPAIR frame contains several repair symbols, this value applies
-      to all of them;
+      a variable-length integer specifying the ID of the first source
+      symbol in the encoding window.  When a FEC REPAIR frame contains
+      several repair symbols, this value applies to all of them;
 
    Repair_Key (16-bit field):  this unsigned integer is used as a seed
-      by the coefficient generation function (Section 3.3) in order to
+      by the coefficient generation function (Section 3.4) in order to
       generate the desired number of coding coefficients.  When a FEC
       Repair Packet contains several repair symbols, this repair key
       value is that of the first repair symbol.  The remaining repair
       keys can be deduced by incrementing by 1 this value, up to a
       maximum value of 65535 after which it loops back to 0.
+
+
+
+
+Roca, et al.             Expires April 27, 2020                 [Page 6]
+
+Internet-Draft                RLC for QUIC                  October 2019
+
 
    Number of Source Symbols in the encoding window, NSS (16-bit field):
 
@@ -321,7 +347,7 @@ Internet-Draft                RLC for QUIC                  October 2019
 
    Density Threshold for the coding coefficients, DT (4-bit field):
       this unsigned integer carries the Density Threshold (DT) used by
-      the coding coefficient generation function Section 3.3.  More
+      the coding coefficient generation function Section 3.4.  More
       precisely, it controls the probability of having a non zero coding
       coefficient, which equals (DT+1) / 16.  When a REPAIR frame
       contains several repair symbols, the DT value applies to all of
@@ -329,26 +355,11 @@ Internet-Draft                RLC for QUIC                  October 2019
 
    Number of Repair Symbols contained in the frame, NRS (12-bit field):
 
-
-
-
-
-Roca, et al.             Expires April 17, 2020                 [Page 6]
-
-Internet-Draft                RLC for QUIC                  October 2019
-
-
       this unsigned integer specifies the number of Repair Symbols
       contained in this REPAIR frame;
 
    Repair Symbols:  data for this repair symbol(s).  This field is NRS*E
       bytes long.
-
-   Note:  TODO: see if it makes sense to have an encoding space smaller
-       for NRS than for NSS.  Maybe should we just put varint fields
-       instead.
-
-4.1.3.1.  RECOVERED Frame Format
 
 4.1.4.  Additional Procedures
 
@@ -371,6 +382,18 @@ Internet-Draft                RLC for QUIC                  October 2019
 
    TBD
 
+
+
+
+
+
+
+
+Roca, et al.             Expires April 27, 2020                 [Page 7]
+
+Internet-Draft                RLC for QUIC                  October 2019
+
+
 6.  IANA Considerations
 
    This document registers two values in the "QUIC FEC Encoding IDs"
@@ -383,16 +406,6 @@ Internet-Draft                RLC for QUIC                  October 2019
 7.  Acknowledgments
 
    TBD
-
-
-
-
-
-
-Roca, et al.             Expires April 17, 2020                 [Page 7]
-
-Internet-Draft                RLC for QUIC                  October 2019
-
 
 8.  References
 
@@ -424,6 +437,19 @@ Internet-Draft                RLC for QUIC                  October 2019
               Progress), February 2019, <https://tools.ietf.org/html/
               draft-ietf-tsvwg-rlc-fec-scheme>.
 
+
+
+
+
+
+
+
+
+Roca, et al.             Expires April 27, 2020                 [Page 8]
+
+Internet-Draft                RLC for QUIC                  October 2019
+
+
    [tinymt32]
               Saito, M., Matsumoto, M., Roca, V., and E. Baccelli,
               "TinyMT32 Pseudo Random Number Generator (PRNG)",
@@ -439,16 +465,6 @@ Internet-Draft                RLC for QUIC                  October 2019
               Comments RFC 8406, June 2018,
               <https://datatracker.ietf.org/doc/draft-irtf-nwcrg-
               network-coding-taxonomy/>.
-
-
-
-
-
-
-Roca, et al.             Expires April 17, 2020                 [Page 8]
-
-Internet-Draft                RLC for QUIC                  October 2019
-
 
 Authors' Addresses
 
@@ -477,28 +493,12 @@ Authors' Addresses
 
 
    Francois Michel
-   UC Louvain
-   Louvain
+   UCLouvain
+   Louvain-la-Neuve
    Belgium
 
    Email: francois.michel@uclouvain.be
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Roca, et al.             Expires April 17, 2020                 [Page 9]
+Roca, et al.             Expires April 27, 2020                 [Page 9]
