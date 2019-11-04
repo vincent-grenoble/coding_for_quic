@@ -2,15 +2,15 @@
 
 
 
-nwcrg                                                            V. Roca
+nwcrg                                                       V. Roca, Ed.
 Internet-Draft                                                     INRIA
-Intended status: Informational                                  I. Swett
-Expires: April 27, 2020                                           Google
+Intended status: Informational                                 F. Michel
+Expires: May 7, 2020                                           UCLouvain
+                                                                I. Swett
+                                                                  Google
                                                           M-J. Montpetit
                                                           Triangle Video
-                                                               F. Michel
-                                                               UCLouvain
-                                                        October 25, 2019
+                                                        November 4, 2019
 
 
 Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC)
@@ -38,7 +38,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 27, 2020.
+   This Internet-Draft will expire on May 7, 2020.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Roca, et al.             Expires April 27, 2020                 [Page 1]
+Roca, et al.               Expires May 7, 2020                  [Page 1]
 
-Internet-Draft                RLC for QUIC                  October 2019
+Internet-Draft                RLC for QUIC                 November 2019
 
 
    to this document.  Code Components extracted from this document must
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Roca, et al.             Expires April 27, 2020                 [Page 2]
+Roca, et al.               Expires May 7, 2020                  [Page 2]
 
-Internet-Draft                RLC for QUIC                  October 2019
+Internet-Draft                RLC for QUIC                 November 2019
 
 
    o  for the transmission of contents to a large set of QUIC reception
@@ -165,9 +165,9 @@ Internet-Draft                RLC for QUIC                  October 2019
 
 
 
-Roca, et al.             Expires April 27, 2020                 [Page 3]
+Roca, et al.               Expires May 7, 2020                  [Page 3]
 
-Internet-Draft                RLC for QUIC                  October 2019
+Internet-Draft                RLC for QUIC                 November 2019
 
 
    QUIC packet
@@ -221,9 +221,9 @@ Internet-Draft                RLC for QUIC                  October 2019
 
 
 
-Roca, et al.             Expires April 27, 2020                 [Page 4]
+Roca, et al.               Expires May 7, 2020                  [Page 4]
 
-Internet-Draft                RLC for QUIC                  October 2019
+Internet-Draft                RLC for QUIC                 November 2019
 
 
 4.  Sliding Window RLC FEC Scheme over GF(2^^8)
@@ -277,9 +277,9 @@ Internet-Draft                RLC for QUIC                  October 2019
 
 
 
-Roca, et al.             Expires April 27, 2020                 [Page 5]
+Roca, et al.               Expires May 7, 2020                  [Page 5]
 
-Internet-Draft                RLC for QUIC                  October 2019
+Internet-Draft                RLC for QUIC                 November 2019
 
 
    Note:  This frame is not idempotent.  In the current version of QUIC,
@@ -333,9 +333,9 @@ Internet-Draft                RLC for QUIC                  October 2019
 
 
 
-Roca, et al.             Expires April 27, 2020                 [Page 6]
+Roca, et al.               Expires May 7, 2020                  [Page 6]
 
-Internet-Draft                RLC for QUIC                  October 2019
+Internet-Draft                RLC for QUIC                 November 2019
 
 
    Number of Source Symbols in the encoding window, NSS (16-bit field):
@@ -389,9 +389,9 @@ Internet-Draft                RLC for QUIC                  October 2019
 
 
 
-Roca, et al.             Expires April 27, 2020                 [Page 7]
+Roca, et al.               Expires May 7, 2020                  [Page 7]
 
-Internet-Draft                RLC for QUIC                  October 2019
+Internet-Draft                RLC for QUIC                 November 2019
 
 
 6.  IANA Considerations
@@ -412,30 +412,30 @@ Internet-Draft                RLC for QUIC                  October 2019
 8.1.  Normative References
 
    [Coding4QUIC]
-              Swett, I., Montpetit, M-J., and V. Roca, "Coding for
-              QUIC", Work in Progress, NWCRG draft-swett-nwcrg-coding-
-              for-quic (Work in Progress), February 2019,
+              Swett, I., Montpetit, M-J., Roca, V., and F. Michel,
+              "Coding for QUIC", Work in Progress, NWCRG draft-swett-
+              nwcrg-coding-for-quic (Work in Progress), October 2019,
               <https://tools.ietf.org/html/draft-swett-nwcrg-coding-for-
               quic>.
 
    [QUIC-transport]
               Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
               Multiplexed and Secure Transport", draft-ietf-quic-
-              transport (Work in Progress) (work in progress), January
+              transport (Work in Progress) (work in progress), November
               2019, <https://datatracker.ietf.org/doc/draft-ietf-quic-
               transport/>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997, <https://www.rfc-
-              editor.org/info/rfc2119>.
+              Requirement Levels", BCP 14, RFC 2119, DOI 10.17487/
+              RFC2119, March 1997,
+              <http://www.rfc-editor.org/info/rfc2119>.
 
    [RLC]      Roca, V. and B. Teibi, "Sliding Window Random Linear Code
               (RLC) Forward Erasure Correction (FEC) Scheme for
               FECFRAME", Work in Progress, Transport Area Working Group
               (TSVWG) draft-ietf-tsvwg-rlc-fec-scheme (Work in
-              Progress), February 2019, <https://tools.ietf.org/html/
-              draft-ietf-tsvwg-rlc-fec-scheme>.
+              Progress), June 2019, <https://tools.ietf.org/html/draft-
+              ietf-tsvwg-rlc-fec-scheme>.
 
 
 
@@ -445,35 +445,42 @@ Internet-Draft                RLC for QUIC                  October 2019
 
 
 
-Roca, et al.             Expires April 27, 2020                 [Page 8]
+Roca, et al.               Expires May 7, 2020                  [Page 8]
 
-Internet-Draft                RLC for QUIC                  October 2019
+Internet-Draft                RLC for QUIC                 November 2019
 
 
    [tinymt32]
               Saito, M., Matsumoto, M., Roca, V., and E. Baccelli,
               "TinyMT32 Pseudo Random Number Generator (PRNG)",
               Transport Area Working Group (TSVWG) draft-roca-tsvwg-
-              tinymt32 (Work in Progress), February 2019,
+              tinymt32 (Work in Progress), June 2019,
               <https://tools.ietf.org/html/draft-roca-tsvwg-tinymt32>.
 
 8.2.  Informative References
 
    [nc-taxonomy]
               Roca (Ed.) et al., V., "Taxonomy of Coding Techniques for
-              Efficient Network Communications", Request For
-              Comments RFC 8406, June 2018,
-              <https://datatracker.ietf.org/doc/draft-irtf-nwcrg-
-              network-coding-taxonomy/>.
+              Efficient Network Communications", Request For Comments
+              RFC 8406, June 2018, <https://datatracker.ietf.org/doc/
+              draft-irtf-nwcrg-network-coding-taxonomy/>.
 
 Authors' Addresses
 
-   Vincent Roca
+   Vincent Roca (editor)
    INRIA
    Univ. Grenoble Alpes
    France
 
    Email: vincent.roca@inria.fr
+
+
+   Francois Michel
+   UCLouvain
+   Louvain-la-Neuve
+   Belgium
+
+   Email: francois.michel@uclouvain.be
 
 
    Ian Swett
@@ -492,13 +499,6 @@ Authors' Addresses
    Email: marie@mjmontpetit.com
 
 
-   Francois Michel
-   UCLouvain
-   Louvain-la-Neuve
-   Belgium
-
-   Email: francois.michel@uclouvain.be
 
 
-
-Roca, et al.             Expires April 27, 2020                 [Page 9]
+Roca, et al.               Expires May 7, 2020                  [Page 9]

@@ -47,7 +47,7 @@
 	
    <title abbrev="RLC for QUIC">Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Schemes for QUIC</title>
 
-   <author fullname="Vincent Roca" initials="V." surname="Roca">
+   <author fullname="Vincent Roca" initials="V." surname="Roca" role="editor">
      <organization>INRIA</organization>
      <address>
        <postal>
@@ -59,6 +59,21 @@
        </postal>
        <phone></phone>
        <email>vincent.roca@inria.fr</email>
+     </address>
+   </author>
+
+   <author fullname="Francois Michel" initials="F." surname="Michel">
+     <organization>UCLouvain</organization>
+     <address>
+       <postal>
+         <street></street>
+         <city>Louvain-la-Neuve</city>
+         <region></region>
+         <code></code>
+         <country>Belgium</country>
+       </postal>
+       <phone></phone>
+       <email>francois.michel@uclouvain.be</email>
      </address>
    </author>
 
@@ -92,20 +107,6 @@
      </address>
    </author>
 
-   <author fullname="Francois Michel" initials="F." surname="Michel">
-     <organization>UCLouvain</organization>
-     <address>
-       <postal>
-         <street></street>
-         <city>Louvain-la-Neuve</city>
-         <region></region>
-         <code></code>
-         <country>Belgium</country>
-       </postal>
-       <phone></phone>
-       <email>francois.michel@uclouvain.be</email>
-     </address>
-   </author>
 
    <date/>
 
@@ -463,7 +464,7 @@ This document registers two values in the "QUIC FEC Encoding IDs" registry as fo
 			<author initials="M." surname="Thomson" fullname="Martin Thomson" role="editor">
 				<organization>Mozilla</organization>
 			</author>
-			<date year="2019" month="January"/>
+			<date year="2019" month="November"/>
 		</front>
 		<seriesInfo name="Internet-Draft" value="draft-ietf-quic-transport (Work in Progress)"/>
 	</reference>
@@ -473,7 +474,7 @@ This document registers two values in the "QUIC FEC Encoding IDs" registry as fo
 		<title>Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Scheme for FECFRAME</title>
 			<author initials="V" surname="Roca" fullname="Vincent Roca"> <organization /> </author>
 			<author initials="B" surname="Teibi" fullname="Belkacem Teibi"> <organization /> </author>
-			<date month="February" year="2019" />
+			<date month="June" year="2019" />
 		</front>
 		<seriesInfo name='Work in' value='Progress' />
 		<seriesInfo name='Transport Area Working Group (TSVWG)' value='draft-ietf-tsvwg-rlc-fec-scheme (Work in Progress)' />
@@ -486,7 +487,7 @@ This document registers two values in the "QUIC FEC Encoding IDs" registry as fo
 			<author initials="M" surname="Matsumoto">  <organization /> </author>
 			<author initials="V." surname="Roca">  <organization /> </author>
 			<author initials="E" surname="Baccelli">  <organization /> </author>
-			<date month="February" year="2019" />
+			<date month="June" year="2019" />
 		</front>
 		<seriesInfo name='Transport Area Working Group (TSVWG)' value='draft-roca-tsvwg-tinymt32 (Work in Progress)' />
 	</reference>
@@ -497,7 +498,8 @@ This document registers two values in the "QUIC FEC Encoding IDs" registry as fo
 			<author initials="I" surname="Swett" fullname="Ian Swett"> <organization /> </author>
 			<author initials="M-J." surname="Montpetit" fullname="Marie-Jose Montpetit"> <organization /> </author>
 			<author initials="V" surname="Roca" fullname="Vincent Roca"> <organization /> </author>
-			<date month="February" year="2019" />
+			<author initials="F" surname="Michel" fullname="Francois Michel"> <organization /> </author>
+			<date month="October" year="2019" />
 		</front>
 		<seriesInfo name='Work in' value='Progress' />
 		<seriesInfo name='NWCRG' value='draft-swett-nwcrg-coding-for-quic (Work in Progress)' />
