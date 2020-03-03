@@ -5,12 +5,12 @@
 nwcrg                                                           I. Swett
 Internet-Draft                                                    Google
 Intended status: Informational                            M-J. Montpetit
-Expires: January 9, 2020                                  Triangle Video
+Expires: September 4, 2020                                Triangle Video
                                                                  V. Roca
                                                                    INRIA
                                                                F. Michel
                                                                UCLouvain
-                                                            July 8, 2019
+                                                           March 3, 2020
 
 
                             Coding for QUIC
@@ -40,32 +40,32 @@ Status of This Memo
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
-   Drafts is at http://datatracker.ietf.org/drafts/current/.
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on January 9, 2020.
+   This Internet-Draft will expire on September 4, 2020.
 
 
 
 
 
-Swett, et al.            Expires January 9, 2020                [Page 1]
+Swett, et al.           Expires September 4, 2020               [Page 1]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
 
 Copyright Notice
 
-   Copyright (c) 2019 IETF Trust and the persons identified as the
+   Copyright (c) 2020 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
-   (http://trustee.ietf.org/license-info) in effect on the date of
+   (https://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -80,7 +80,7 @@ Table of Contents
    3.  General Design Considerations . . . . . . . . . . . . . . . .   4
      3.1.  FEC Code versus FEC Scheme, Block Codes versus Sliding
            Window Codes  . . . . . . . . . . . . . . . . . . . . . .   4
-     3.2.  FEC Scheme Negotiation  . . . . . . . . . . . . . . . . .   5
+     3.2.  FEC Scheme Negotiation  . . . . . . . . . . . . . . . . .   4
      3.3.  FEC Protection Within an Encrypted Channel  . . . . . . .   5
      3.4.  About Middleboxes . . . . . . . . . . . . . . . . . . . .   5
    4.  FEC Protection Principles . . . . . . . . . . . . . . . . . .   5
@@ -98,23 +98,21 @@ Table of Contents
      4.6.  About Gaps in the Set of Source Symbols Considered During
            Encoding  . . . . . . . . . . . . . . . . . . . . . . . .  12
    5.  FEC Scheme Negotiation in QUIC  . . . . . . . . . . . . . . .  12
-     5.1.  FEC Scheme Selection Process  . . . . . . . . . . . . . .  13
-     5.2.  FEC Scheme Configuration Information  . . . . . . . . . .  14
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
-   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  14
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  14
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .  15
+     5.1.  FEC Scheme Negotiation  . . . . . . . . . . . . . . . . .  13
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  15
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
+   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  16
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  16
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  16
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  16
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  17
 
 
 
-Swett, et al.            Expires January 9, 2020                [Page 2]
+Swett, et al.           Expires September 4, 2020               [Page 2]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
-
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  15
 
 1.  Introduction
 
@@ -160,19 +158,17 @@ Internet-Draft               Coding for QUIC                   July 2019
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119].
 
-
-
-
-
-
-Swett, et al.            Expires January 9, 2020                [Page 3]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
    Terms and definitions that apply to coding are available in
    [nc-taxonomy].  More specifically, this document uses the following
    definitions:
+
+
+
+
+Swett, et al.           Expires September 4, 2020               [Page 3]
+
+Internet-Draft               Coding for QUIC                  March 2020
+
 
    Packet versus Symbol:  a Packet is the unit of data that is exchanged
       over the network while a Symbol is the unit of data that is
@@ -214,18 +210,6 @@ Internet-Draft               Coding for QUIC                   July 2019
    FEC protection to QUIC, usually with an advantage for sliding window
    codes when it comes to low latency communications.
 
-
-
-
-
-
-
-
-Swett, et al.            Expires January 9, 2020                [Page 4]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
 3.2.  FEC Scheme Negotiation
 
    There are multiple FEC Scheme candidates.  Therefore a negotiation
@@ -233,6 +217,14 @@ Internet-Draft               Coding for QUIC                   July 2019
    session.  This will be implemented using the one step negotiation of
    the new QUIC negotiation mechanism [QUIC-transport], during the QUIC
    handshake.
+
+
+
+
+Swett, et al.           Expires September 4, 2020               [Page 4]
+
+Internet-Draft               Coding for QUIC                  March 2020
+
 
    Editor's notes:
 
@@ -274,14 +266,6 @@ Internet-Draft               Coding for QUIC                   July 2019
    A QUIC packet payload consists in a set of QUIC frames.  These frames
    either carry application data (e.g., in a STREAM or DATAGRAM frame)
    or control information (e.g., a MAX_DATA frame).  Each packet is
-
-
-
-Swett, et al.            Expires January 9, 2020                [Page 5]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
    either entirely received or lost, and is uniquely identified by a
    monotonically increasing Packet Number.
 
@@ -290,6 +274,14 @@ Internet-Draft               Coding for QUIC                   July 2019
    packet retransmission.  In addition to application data, QUIC
    transfers might benefit from protecting control frames having a
    potential impact on the transmission throughput, such as MAX_DATA or
+
+
+
+Swett, et al.           Expires September 4, 2020               [Page 5]
+
+Internet-Draft               Coding for QUIC                  March 2020
+
+
    MAX_STREAM_DATA frames.  Therefore this document introduces an FEC
    protection across all -- or a subset of -- the frames of a given QUIC
    packet.  This design choice impacts the QUIC packet to source symbols
@@ -329,17 +321,22 @@ Internet-Draft               Coding for QUIC                   July 2019
    E-1 bytes or E-1-4 bytes for the first chunk when the QUIC Packet
    Number needs to be added ((Section 4.2.2).  Depending on the relative
    value of E-1 (or E-1-4) and the QUIC packet payload size, a packet
-
-
-
-
-Swett, et al.            Expires January 9, 2020                [Page 6]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
    can potentially contain more than one chunks.  This is a first step
    into producing source symbols.  Figure 1 illustrates this process.
+
+
+
+
+
+
+
+
+
+
+Swett, et al.           Expires September 4, 2020               [Page 6]
+
+Internet-Draft               Coding for QUIC                  March 2020
+
 
                      |<E-1-4>|< E-1 >|< E-1 >|< E-1 >|
                      |       |       |       |       |
@@ -389,9 +386,12 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
 
-Swett, et al.            Expires January 9, 2020                [Page 7]
+
+
+
+Swett, et al.           Expires September 4, 2020               [Page 7]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
 
     0                   1                   2                   3
@@ -445,9 +445,9 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
 
-Swett, et al.            Expires January 9, 2020                [Page 8]
+Swett, et al.           Expires September 4, 2020               [Page 8]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
 
    QUIC packet
@@ -501,9 +501,9 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
 
-Swett, et al.            Expires January 9, 2020                [Page 9]
+Swett, et al.           Expires September 4, 2020               [Page 9]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
 
       protecting packets of different sizes.  The smaller packet payload
@@ -557,9 +557,9 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
 
-Swett, et al.            Expires January 9, 2020               [Page 10]
+Swett, et al.           Expires September 4, 2020              [Page 10]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
 
 4.3.  Source Symbol Signaling
@@ -613,9 +613,9 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
 
-Swett, et al.            Expires January 9, 2020               [Page 11]
+Swett, et al.           Expires September 4, 2020              [Page 11]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
 
    recovered packet through a regular acknowledement, as it would
@@ -669,9 +669,9 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
 
-Swett, et al.            Expires January 9, 2020               [Page 12]
+Swett, et al.           Expires September 4, 2020              [Page 12]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
 
       lifetime.  For instance, this is the case of the symbol size
@@ -702,38 +702,114 @@ Internet-Draft               Coding for QUIC                   July 2019
           a FEC Scheme on a QUIC session basis, therefore to be used for
           all the Streams that need FEC protection?
 
-5.1.  FEC Scheme Selection Process
+5.1.  FEC Scheme Negotiation
 
-   Let us consider the FEC Scheme selection process between the QUIC
-   endpoints.  Figure 6 illustrates the principle when a QUIC reception
-   endpoint initiates the exchange.
-
-   QUIC sender                                       QUIC receiver
-         < - - - - - - - - - - - - - - - - - - - - - -
-                supported_fec_scheme_32b{FEC_Encoding_ID1 | other}
-                supported_fec_scheme_64b{FEC_Encoding_ID2 | other}
-
-   choose FEC Scheme 1
-         - - - - - - - - - - - - - - - - - - - - - - >
-         supported_fec_scheme_32b{FEC_Encoding_ID1 | other}
-
-    Figure 6: Example FEC Scheme selection process, during the initial
-                               negotiation.
-
-   The supported_fec_scheme_16b and supported_fec_scheme_32b are two new
-   TransportParameterId to be added to the "Table 7: Initial QUIC
+   Before defining the transport parameters, we define two structures,
+   encoder_fec_scheme_t and decoder_fec_scheme_t, defined in Figure 6.
+   The config field is an opaque field allowing the decoder to define a
+   configuration for the FEC Scheme.  A FEC Scheme specification MUST
+   define the set of valid configurations for the FEC Scheme.
 
 
 
-Swett, et al.            Expires January 9, 2020               [Page 13]
+
+
+
+
+
+
+
+
+
+
+
+
+
+Swett, et al.           Expires September 4, 2020              [Page 13]
 
-Internet-Draft               Coding for QUIC                   July 2019
+Internet-Draft               Coding for QUIC                  March 2020
 
 
-   Transport Parameters Entries" Section 13.1, of [QUIC-transport].  The
-   supported_fec_scheme_32b contains a 32-bit data field to carry opaque
-   32-bit value, while the supported_fec_scheme_64b contains a 64-bit
-   data field to carry opaque 64-bit value (see Section 5.2).
+   struct {
+       varint fec_scheme_id;
+   } encoder_fec_scheme_t
+
+   struct {
+       varint   fec_scheme_id;
+       uint16_t config_length;
+       uint8_t  config[config_length];
+   } decoder_fec_scheme_t
+
+
+
+    Figure 6: encoder_fec_scheme_t and decoder_fec_scheme_t structures.
+
+   We define three new transport parameters to negotiate the FEC Scheme
+   used during the connection.
+
+   o  supported_decoder_fec_schemes: list of supported FEC schemes for
+      the decoding part listed from the most to the least preferred.
+      The value of this parameter consists in a list of
+      decoder_fec_scheme_t, each one representing the ID of a supported
+      FEC Scheme.
+
+   o  supported_encoder_fec_schemes: list of supported FEC schemes for
+      the decoding part listed from the most to the least preferred.
+      The value of this parameter consists in a list of
+      encoder_fec_scheme_t.  When announcing a FEC Scheme, the encoder
+      MUST be able handle every FEC Scheme configuration considered
+      valid.
+
+   o  receiving_symbol_size: the size of the symbols the peer is willing
+      to receive and recover.  The value is a 16-bits integer.
+
+   The decoding FEC Scheme of a QUIC endpoint is set to the first FEC
+   Scheme listed in its own supported_decoder_fec_schemes that also
+   appears in the peer's supported_encoder_fec_schemes.  The encoding
+   FEC Scheme of a QUIC endpoint is set to the first FEC Scheme listed
+   in the peer's supported_decoder_fec_schemes that also appears in its
+   own supported_encoder_fec_schemes.  The encoder-side symbol size (E)
+   of a QUIC endpoint is set to the value announced by the peer's
+   receiving_symbol_size transport parameter.  The decoder-side symbol
+   size of a QUIC endpoint is set to the value announced in its own
+   receiving_symbol_size transport parameter.
+
+
+
+
+
+
+
+
+Swett, et al.           Expires September 4, 2020              [Page 14]
+
+Internet-Draft               Coding for QUIC                  March 2020
+
+
+   Host 1                                             Host 2
+         < - - - - - - - - - - - - - - - - - - - - - -
+               supported_decoder_fec_schemes{XOR}
+               supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
+               receiving_symbol_size{500}
+
+         - - - - - - - - - - - - - - - - - - - - - - >
+         supported_decoder_fec_schemes{RLC_GF256,REED_SOLOMON}
+         supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
+         receiving_symbol_size{200}
+
+   ENCODER_FEC_SCHEME = XOR
+   DECODER_FEC_SCHEME = RLC_GF256
+   ENCODER_SYMBOL_SIZE = 500
+   DECODER_SYMBOL_SIZE = 200
+
+                                    ENCODER_FEC_SCHEME = XOR
+                              DECODER_FEC_SCHEME = RLC_GF256
+                                   ENCODER_SYMBOL_SIZE = 200
+                                   DECODER_SYMBOL_SIZE = 500
+
+
+
+   Figure 7: Example FEC Schemes negotiation during the QUIC handshake.
 
    It is possible that the QUIC endpoint that receives one or more FEC
    Scheme proposals from the initiator cannot select any of them.  In
@@ -746,16 +822,6 @@ Internet-Draft               Coding for QUIC                   July 2019
        *  Can the second QUIC endpoint change the proposed static
           parameters?  In that case can the initator refuse?
 
-5.2.  FEC Scheme Configuration Information
-
-   Let us now focus on the communication of configuration information
-   specific to the selected FEC Scheme.  In Figure 6, the
-   supported_fec_scheme_32b{FS1_Encoding_ID} contains a field meant to
-   carry the FEC Encoding ID of the FEC Scheme selected plus addditional
-   configuration information if any.  If a 32 bit opaque field is not
-   sufficient, the supported_fec_scheme_64b can be used instead and
-   proposes a 64 bit opaque field.
-
 6.  Security Considerations
 
    TBD
@@ -763,6 +829,18 @@ Internet-Draft               Coding for QUIC                   July 2019
 7.  IANA Considerations
 
    TBD
+
+
+
+
+
+
+
+
+Swett, et al.           Expires September 4, 2020              [Page 15]
+
+Internet-Draft               Coding for QUIC                  March 2020
+
 
 8.  Acknowledgments
 
@@ -777,15 +855,6 @@ Internet-Draft               Coding for QUIC                   July 2019
               RFC 8312, DOI 10.17487/RFC8312, February 2018,
               <https://www.rfc-editor.org/info/rfc8312>.
 
-
-
-
-
-Swett, et al.            Expires January 9, 2020               [Page 14]
-
-Internet-Draft               Coding for QUIC                   July 2019
-
-
    [QUIC-transport]
               Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
               Multiplexed and Secure Transport", draft-ietf-quic-
@@ -794,16 +863,23 @@ Internet-Draft               Coding for QUIC                   July 2019
               transport/>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119, DOI 10.17487/
-              RFC2119, March 1997,
-              <http://www.rfc-editor.org/info/rfc2119>.
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
 
 9.2.  Informative References
 
+   [nc-taxonomy]
+              Roca (Ed.) et al., V., "Taxonomy of Coding Techniques for
+              Efficient Network Communications", Request For
+              Comments RFC 8406, June 2018,
+              <https://datatracker.ietf.org/doc/draft-irtf-nwcrg-
+              network-coding-taxonomy/>.
+
    [RFC5510]  Lacan, J., Roca, V., Peltotalo, J., and S. Peltotalo,
-              "Reed-Solomon Forward Error Correction (FEC) Schemes", RFC
-              5510, DOI 10.17487/RFC5510, April 2009, <https://www.rfc-
-              editor.org/info/rfc5510>.
+              "Reed-Solomon Forward Error Correction (FEC) Schemes",
+              RFC 5510, DOI 10.17487/RFC5510, April 2009,
+              <https://www.rfc-editor.org/info/rfc5510>.
 
    [RLC]      Roca, V. and B. Teibi, "Sliding Window Random Linear Code
               (RLC) Forward Erasure Correction (FEC) Scheme for
@@ -812,11 +888,15 @@ Internet-Draft               Coding for QUIC                   July 2019
               Progress), June 2019, <https://tools.ietf.org/html/draft-
               ietf-tsvwg-rlc-fec-scheme>.
 
-   [nc-taxonomy]
-              Roca (Ed.) et al., V., "Taxonomy of Coding Techniques for
-              Efficient Network Communications", Request For Comments
-              RFC 8406, June 2018, <https://datatracker.ietf.org/doc/
-              draft-irtf-nwcrg-network-coding-taxonomy/>.
+
+
+
+
+
+Swett, et al.           Expires September 4, 2020              [Page 16]
+
+Internet-Draft               Coding for QUIC                  March 2020
+
 
 Authors' Addresses
 
@@ -834,12 +914,6 @@ Authors' Addresses
    US
 
    Email: marie@mjmontpetit.com
-
-
-
-Swett, et al.            Expires January 9, 2020               [Page 15]
-
-Internet-Draft               Coding for QUIC                   July 2019
 
 
    Vincent Roca
@@ -875,22 +949,4 @@ Internet-Draft               Coding for QUIC                   July 2019
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Swett, et al.            Expires January 9, 2020               [Page 16]
+Swett, et al.           Expires September 4, 2020              [Page 17]

@@ -636,64 +636,103 @@ FEC Scheme negotiation has two goals:
 </list>
 </t>
 
-        <section title="FEC Scheme Selection Process">
-        <!-- ====================== -->
+    <section title="FEC Scheme Negotiation">
+        <t>
+            Before defining the transport parameters, we define two structures, encoder_fec_scheme_t and decoder_fec_scheme_t,
+            defined in <xref target="fig_fec_schemes_structures"/>. The config field is an opaque field allowing the decoder to define a configuration
+            for the FEC Scheme. A FEC Scheme specification MUST define the set of valid configurations for the FEC Scheme.
 
-<t>
-Let us consider the FEC Scheme selection process between the QUIC endpoints.
-<xref target="fig_fec_scheme_selection"/> illustrates the principle when a QUIC reception endpoint initiates the exchange.
-</t>
+            <figure anchor="fig_fec_schemes_structures" title="encoder_fec_scheme_t and decoder_fec_scheme_t structures.">
+                <artwork><![CDATA[
+struct {
+    varint fec_scheme_id;
+} encoder_fec_scheme_t
 
-<figure anchor="fig_fec_scheme_selection" title="Example FEC Scheme selection process, during the initial negotiation.">
-        <artwork><![CDATA[
-QUIC sender                                       QUIC receiver
-      < - - - - - - - - - - - - - - - - - - - - - -
-             supported_fec_scheme_32b{FEC_Encoding_ID1 | other}
-             supported_fec_scheme_64b{FEC_Encoding_ID2 | other}
+struct {
+    varint   fec_scheme_id;
+    uint16_t config_length;
+    uint8_t  config[config_length];
+} decoder_fec_scheme_t
 
-choose FEC Scheme 1
-      - - - - - - - - - - - - - - - - - - - - - - >
-      supported_fec_scheme_32b{FEC_Encoding_ID1 | other}
+
 ]]></artwork>
-</figure>
+            </figure>
 
-<t>
-The supported_fec_scheme_16b and supported_fec_scheme_32b are two new TransportParameterId to be added to the
-"Table 7: Initial QUIC Transport Parameters Entries" Section 13.1, of <xref target="QUIC-transport"/>.
-The supported_fec_scheme_32b contains a 32-bit data field to carry opaque 32-bit value, while
-the supported_fec_scheme_64b contains a 64-bit data field to carry opaque 64-bit value
-(see <xref target="sec_fec_scheme_config_info"/>).
-</t>
 
-<t>
-It is possible that the QUIC endpoint that receives one or more FEC Scheme proposals from the initiator cannot select any of them.
-In that case the negotiation process fails...
-</t>
+            We define three new transport parameters to negotiate the FEC Scheme used during the connection.
 
-<t>
-<list hangIndent="4" style="hanging">
-<t hangText="Editor's notes:">
-    <list style="symbols">
-    <t> So what? How does it finishes? Consequences?</t>
-    <t> Can the second QUIC endpoint change the proposed static parameters? In that case can the initator refuse?</t>
-    </list></t>
-</list>
-</t>
+            <list style="symbols">
+                <t> supported_decoder_fec_schemes: list of supported FEC schemes for the decoding part listed from the
+                    most to the least preferred. The value of this parameter consists in a list of decoder_fec_scheme_t,
+                    each one representing the ID of a supported FEC Scheme. </t>
+                <t> supported_encoder_fec_schemes: list of supported FEC schemes for the decoding part listed from the most
+                    to the least preferred. The value of this parameter consists in a list of encoder_fec_scheme_t.
+                    When announcing a FEC Scheme, the encoder MUST be able handle every FEC Scheme configuration considered valid.</t>
+                <t> receiving_symbol_size: the size of the symbols the peer is willing to receive and recover.
+                    The value is a 16-bits integer. </t>
+            </list>
+        </t>
 
-        </section>
+        <t>
+            The decoding FEC Scheme of a QUIC endpoint is set to the first FEC Scheme listed in its own supported_decoder_fec_schemes
+            that also appears in the peer's supported_encoder_fec_schemes.
+            The encoding FEC Scheme of a QUIC endpoint is set to the first FEC Scheme listed in the peer's supported_decoder_fec_schemes
+            that also appears in its own supported_encoder_fec_schemes.
 
-        <section anchor="sec_fec_scheme_config_info" title="FEC Scheme Configuration Information">
-        <!-- ====================== -->
+            The encoder-side symbol size (E) of a QUIC endpoint is set to the value announced by the peer's receiving_symbol_size
+            transport parameter. The decoder-side symbol size of a QUIC endpoint is set to the value announced in its own
+            receiving_symbol_size transport parameter.
+        </t>
 
-<t>
-Let us now focus on the communication of configuration information specific to the selected FEC Scheme.
-In <xref target="fig_fec_scheme_selection"/>, the supported_fec_scheme_32b{FS1_Encoding_ID} contains a field
-meant to carry the FEC Encoding ID of the FEC Scheme selected plus addditional configuration information if any.
-If a 32 bit opaque field is not sufficient, the supported_fec_scheme_64b can be used instead and proposes a 64 bit
-opaque field.
-</t>
 
-        </section>
+        <figure anchor="fig_fec_schemes_negotiation" title="Example FEC Schemes negotiation during the QUIC handshake.">
+            <artwork><![CDATA[
+Host 1                                             Host 2
+      < - - - - - - - - - - - - - - - - - - - - - -
+            supported_decoder_fec_schemes{XOR}
+            supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
+            receiving_symbol_size{500}
+
+      - - - - - - - - - - - - - - - - - - - - - - >
+      supported_decoder_fec_schemes{RLC_GF256,REED_SOLOMON}
+      supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
+      receiving_symbol_size{200}
+
+ENCODER_FEC_SCHEME = XOR
+DECODER_FEC_SCHEME = RLC_GF256
+ENCODER_SYMBOL_SIZE = 500
+DECODER_SYMBOL_SIZE = 200
+
+                                 ENCODER_FEC_SCHEME = XOR
+                           DECODER_FEC_SCHEME = RLC_GF256
+                                ENCODER_SYMBOL_SIZE = 200
+                                DECODER_SYMBOL_SIZE = 500
+
+
+]]></artwork>
+        </figure>
+
+
+
+        <t>
+            It is possible that the QUIC endpoint that receives one or more FEC Scheme proposals from the initiator cannot select any of them.
+            In that case the negotiation process fails...
+        </t>
+
+        <t>
+            <list hangIndent="4" style="hanging">
+                <t hangText="Editor's notes:">
+                    <list style="symbols">
+                        <t> So what? How does it finishes? Consequences?</t>
+                        <t> Can the second QUIC endpoint change the proposed static parameters? In that case can the initator refuse?</t>
+                    </list></t>
+            </list>
+        </t>
+
+    </section>
+
+
+
 
     </section>
 
