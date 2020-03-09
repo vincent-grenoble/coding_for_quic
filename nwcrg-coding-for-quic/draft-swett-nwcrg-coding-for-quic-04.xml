@@ -700,7 +700,7 @@ Host 1                                                         Host 2
                       supported_decoder_fec_schemes{REED_SOLOMON,XOR}
                                            receiving_symbol_size{500}
 
-      - - - - - - - - - - - - - - - - - - - - - - - -- - -  - >
+      - - - - - - - - - - - - - - - - - - - - - - - - - - - - >
 supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
 supported_decoder_fec_schemes{RLC_GF256,REED_SOLOMON}
 receiving_symbol_size{200}
