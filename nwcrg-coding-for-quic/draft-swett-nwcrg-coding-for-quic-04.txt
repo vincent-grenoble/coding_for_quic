@@ -469,14 +469,14 @@ Internet-Draft               Coding for QUIC                  March 2020
 
    Figure 5 shows an example where the 4 source symbols are created from
    the payload of a given QUIC packet.  The first chunk may contain zero
-   padding at the begining in order to align the protected packet
+   padding at the beginning in order to align the protected packet
    payload size to a multiple of E-1, and the first source symbol may
    contain the QUIC Packet Number.
 
    Each source symbol is uniquely identified allowing to determine
    unambiguously its position in the source symbol flow.  What
    information to associate to a source symbol to uniquely identify it
-   is FEC Scheme dependant.  Section 4.3 gives insight on this topic.
+   is FEC Scheme dependent.  Section 4.3 gives insight on this topic.
 
 4.2.2.1.  Open questions: Content of Source Symbols Metadata?  Removing
           certain frames from FEC protection?
@@ -645,7 +645,7 @@ Internet-Draft               Coding for QUIC                  March 2020
    Supporting gaps can be motivated by the desire to reduce encoding and
    decoding complexity since there are fewer variables.  However this
    choice has major consequences in terms of signaling.  Indeed each
-   repair symbol transmitted MUST be accompanied with enough information
+   repair symbol transmitted MUST be accompanied by enough information
    for the QUIC decoding endpoint to unambiguously identify the exact
    composition of the block or encoding window.  Without any gap, the
    identity of the first source symbol plus the number of symbols in the
@@ -653,8 +653,7 @@ Internet-Draft               Coding for QUIC                  March 2020
    encoding needs to be used, perhaps similar to the encoding used for
    selective acknowledgments.
 
-   Whether or not gaps are supported MUST be clarified in each FEC
-   Scheme.
+   Whether gaps are supported MUST be clarified in each FEC Scheme.
 
 5.  FEC Scheme Negotiation in QUIC
 
@@ -666,6 +665,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
    o  Communicating a certain number of parameters, the "Configuration
       Information", that are not expected to change over the session
+      lifetime.  For instance, this is the case of the symbol size
 
 
 
@@ -674,7 +674,6 @@ Swett, et al.          Expires September 10, 2020              [Page 12]
 Internet-Draft               Coding for QUIC                  March 2020
 
 
-      lifetime.  For instance, this is the case of the symbol size
       parameter, E (in bytes), that needs either to be agreed between
       the endpoints, or chosen by the sender and communicated to the
       receiver(s);
@@ -710,6 +709,7 @@ Internet-Draft               Coding for QUIC                  March 2020
    supported configuration information for the associated FEC Scheme.  A
    FEC Scheme specification MUST define the set of valid configurations
    for the FEC Scheme.
+
 
 
 
@@ -765,7 +765,7 @@ Internet-Draft               Coding for QUIC                  March 2020
       integer.
 
    Since communications can be bidirectional, each QUIC endpoint can
-   provide the three parameters.  Conversely, providing a empty list
+   provide the three parameters.  Conversely, providing an empty list
    indicates this endpoint does not support FEC for the associated
    communication path (e.g., an empty supported_decoder_fec_schemes list
    indicates this endpoint cannot perform FEC decoding).

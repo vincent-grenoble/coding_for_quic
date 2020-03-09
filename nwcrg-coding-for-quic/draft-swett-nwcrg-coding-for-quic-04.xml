@@ -432,12 +432,12 @@ QUIC packet
 
 <t>
 <xref target="fig:ss-encoding"/> shows an example where the 4 source symbols are created from the payload of a given QUIC packet.
-The first chunk may contain zero padding at the begining in order to align the protected packet payload size to a multiple of E-1, and the first source symbol may contain the QUIC Packet Number.
+The first chunk may contain zero padding at the beginning in order to align the protected packet payload size to a multiple of E-1, and the first source symbol may contain the QUIC Packet Number.
 </t>
 
 <t>
 Each source symbol is uniquely identified allowing to determine unambiguously its position in the source symbol flow.
-What information to associate to a source symbol to uniquely identify it is FEC Scheme dependant.
+What information to associate to a source symbol to uniquely identify it is FEC Scheme dependent.
 <xref target="sec:src_symb_signaling"/> gives insight on this topic.
 </t>
 
@@ -590,13 +590,13 @@ This is particularly true with Sliding Window codes because of their flexibility
 <t>
 Supporting gaps can be motivated by the desire to reduce encoding and decoding complexity since there are fewer variables.
 However this choice has major consequences in terms of signaling.
-Indeed each repair symbol transmitted MUST be accompanied with enough information for the QUIC decoding endpoint to unambiguously identify the exact composition of the block or encoding window.
+Indeed each repair symbol transmitted MUST be accompanied by enough information for the QUIC decoding endpoint to unambiguously identify the exact composition of the block or encoding window.
 Without any gap, the identity of the first source symbol plus the number of symbols in the block or encoding window is sufficient.
 With gaps, a more complex encoding needs to be used, perhaps similar to the encoding used for selective acknowledgments.
 </t>
 
 <t>
-Whether or not gaps are supported MUST be clarified in each FEC Scheme.
+Whether gaps are supported MUST be clarified in each FEC Scheme.
 </t>
 
         </section>
@@ -676,7 +676,7 @@ struct {
 
         <t>
             Since communications can be bidirectional, each QUIC endpoint can provide the three parameters.
-            Conversely, providing a empty list indicates this endpoint does not support FEC for the associated communication path
+            Conversely, providing an empty list indicates this endpoint does not support FEC for the associated communication path
             (e.g., an empty supported_decoder_fec_schemes list indicates this endpoint cannot perform FEC decoding).
         </t>
 
