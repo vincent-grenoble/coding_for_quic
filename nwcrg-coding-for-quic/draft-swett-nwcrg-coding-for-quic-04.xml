@@ -11,6 +11,7 @@
 <!ENTITY RFC2629 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2629.xml">
 <!-- <!ENTITY RFC3452 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3452.xml"> -->
 <!ENTITY RFC5510 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5510.xml">
+<!ENTITY RFC8681 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8681.xml">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
@@ -37,7 +38,7 @@
 <?rfc subcompact="no" ?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="info" docName="draft-swett-nwcrg-coding-for-quic-03" ipr="trust200902">
+<rfc category="info" docName="draft-swett-nwcrg-coding-for-quic-04" ipr="trust200902">
  <!-- category values: std, bcp, info, exp, and historic
     ipr values: trust200902, noModificationTrust200902, noDerivativesTrust200902,
        or pre5378Trust200902
@@ -152,7 +153,7 @@ The ability to add FEC coding in QUIC may be beneficial in several situations:
 <t>
 This framework does not mandate the use of any specific FEC code (i.e., how to encode and decode) nor FEC Scheme (i.e., that specifies both a FEC code and how to use it, in particular in terms of signaling).
 Instead it allows to negotiate the FEC Scheme to use at session startup, assuming that more than one solution could potentially be offered concurrently.
-Without loss of generality, we assume that the encoding operations compute a linear combination of QUIC packets, regardless of whether these codes are of block type (as with Reed-Solomon codes <xref target="RFC5510"/>) or sliding window type (as with RLC codes <xref target="RLC"/>).
+Without loss of generality, we assume that the encoding operations compute a linear combination of QUIC packets, regardless of whether these codes are of block type (as with Reed-Solomon codes <xref target="RFC5510"/>) or sliding window type (as with RLC codes <xref target="RFC8681"/>).
 </t>
 
     </section>
@@ -206,7 +207,7 @@ In particular the FEC Scheme defines signaling (e.g., information contained in S
 </t>
 
 <t>
-Block coding (e.g., Reed-Solomon <xref target="RFC5510"/>) and sliding window coding (e.g., RLC <xref target="RLC"/>) are two broad classes of FEC codes <xref target="nc-taxonomy"/>.
+Block coding (e.g., Reed-Solomon <xref target="RFC5510"/>) and sliding window coding (e.g., RLC <xref target="RFC8681"/>) are two broad classes of FEC codes <xref target="nc-taxonomy"/>.
 In the first case, the input flow must be first segmented into a sequence of blocks, FEC encoding and decoding being performed independently on a per-block basis.
 In the second case rely, a sliding encoding window continuously slides over the input flow.
 It is envisioned that the two classes of codes could be used to bring FEC protection to QUIC, usually with an advantage for sliding window codes when it comes to low latency communications.
@@ -639,8 +640,9 @@ FEC Scheme negotiation has two goals:
     <section title="FEC Scheme Negotiation">
         <t>
             Before defining the transport parameters, we define two structures, encoder_fec_scheme_t and decoder_fec_scheme_t,
-            defined in <xref target="fig_fec_schemes_structures"/>. The config field is an opaque field allowing the decoder to define a configuration
-            for the FEC Scheme. A FEC Scheme specification MUST define the set of valid configurations for the FEC Scheme.
+            in <xref target="fig_fec_schemes_structures"/>.
+            The config field is an opaque field allowing the decoder to define supported configuration information for the associated FEC Scheme.
+            A FEC Scheme specification MUST define the set of valid configurations for the FEC Scheme.
 
             <figure anchor="fig_fec_schemes_structures" title="encoder_fec_scheme_t and decoder_fec_scheme_t structures.">
                 <artwork><![CDATA[
@@ -658,19 +660,24 @@ struct {
 ]]></artwork>
             </figure>
 
-
-            We define three new transport parameters to negotiate the FEC Scheme used during the connection.
+            The following three transport parameters are used by the QUIC endpoints to negotiate the FEC Scheme used during the connection.
 
             <list style="symbols">
+                <t> supported_encoder_fec_schemes: list of supported FEC schemes for the encoding part listed from the most
+                    to the least preferred. The value of this parameter consists in a list of encoder_fec_scheme_t.
+                    When announcing a FEC Scheme, the encoder MUST be able handle every FEC Scheme configuration considered valid.</t>
                 <t> supported_decoder_fec_schemes: list of supported FEC schemes for the decoding part listed from the
                     most to the least preferred. The value of this parameter consists in a list of decoder_fec_scheme_t,
                     each one representing the ID of a supported FEC Scheme. </t>
-                <t> supported_encoder_fec_schemes: list of supported FEC schemes for the decoding part listed from the most
-                    to the least preferred. The value of this parameter consists in a list of encoder_fec_scheme_t.
-                    When announcing a FEC Scheme, the encoder MUST be able handle every FEC Scheme configuration considered valid.</t>
-                <t> receiving_symbol_size: the size of the symbols the peer is willing to receive and recover.
+                <t> receiving_symbol_size: the size in bytes of the symbols the peer is willing to receive and recover.
                     The value is a 16-bits integer. </t>
             </list>
+        </t>
+
+        <t>
+            Since communications can be bidirectional, each QUIC endpoint can provide the three parameters.
+            Conversely, providing a empty list indicates this endpoint does not support FEC for the associated communication path
+            (e.g., an empty supported_decoder_fec_schemes list indicates this endpoint cannot perform FEC decoding).
         </t>
 
         <t>
@@ -687,46 +694,32 @@ struct {
 
         <figure anchor="fig_fec_schemes_negotiation" title="Example FEC Schemes negotiation during the QUIC handshake.">
             <artwork><![CDATA[
-Host 1                                             Host 2
-      < - - - - - - - - - - - - - - - - - - - - - -
-            supported_decoder_fec_schemes{XOR}
+Host 1                                                         Host 2
+      < - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
-            receiving_symbol_size{500}
+                      supported_decoder_fec_schemes{REED_SOLOMON,XOR}
+                                           receiving_symbol_size{500}
 
-      - - - - - - - - - - - - - - - - - - - - - - >
-      supported_decoder_fec_schemes{RLC_GF256,REED_SOLOMON}
-      supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
-      receiving_symbol_size{200}
+      - - - - - - - - - - - - - - - - - - - - - - - -- - -  - >
+supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
+supported_decoder_fec_schemes{RLC_GF256,REED_SOLOMON}
+receiving_symbol_size{200}
 
-ENCODER_FEC_SCHEME = XOR
+ENCODER_FEC_SCHEME = REED_SOLOMON
 DECODER_FEC_SCHEME = RLC_GF256
 ENCODER_SYMBOL_SIZE = 500
 DECODER_SYMBOL_SIZE = 200
 
-                                 ENCODER_FEC_SCHEME = XOR
-                           DECODER_FEC_SCHEME = RLC_GF256
-                                ENCODER_SYMBOL_SIZE = 200
-                                DECODER_SYMBOL_SIZE = 500
-
-
+                                       ENCODER_FEC_SCHEME = RLC_GF256
+                                    DECODER_FEC_SCHEME = REED_SOLOMON
+                                            ENCODER_SYMBOL_SIZE = 200
+                                            DECODER_SYMBOL_SIZE = 500
 ]]></artwork>
         </figure>
 
-
-
         <t>
             It is possible that the QUIC endpoint that receives one or more FEC Scheme proposals from the initiator cannot select any of them.
-            In that case the negotiation process fails...
-        </t>
-
-        <t>
-            <list hangIndent="4" style="hanging">
-                <t hangText="Editor's notes:">
-                    <list style="symbols">
-                        <t> So what? How does it finishes? Consequences?</t>
-                        <t> Can the second QUIC endpoint change the proposed static parameters? In that case can the initator refuse?</t>
-                    </list></t>
-            </list>
+            In that case the negotiation process fails and no FEC protection is used.
         </t>
 
     </section>
@@ -831,6 +824,7 @@ DECODER_SYMBOL_SIZE = 200
     <!-- ====================== -->
     <!-- &RFC3452; -->
     &RFC5510;
+    &RFC8681;
 
     <reference anchor="nc-taxonomy" target="https://datatracker.ietf.org/doc/draft-irtf-nwcrg-network-coding-taxonomy/">
         <front>
@@ -843,16 +837,6 @@ DECODER_SYMBOL_SIZE = 200
         <seriesInfo name="Request For Comments" value="RFC 8406"/>
     </reference>
 
-    <reference anchor="RLC" target="https://tools.ietf.org/html/draft-ietf-tsvwg-rlc-fec-scheme">
-        <front>
-        <title>Sliding Window Random Linear Code (RLC) Forward Erasure Correction (FEC) Scheme for FECFRAME</title>
-            <author initials="V" surname="Roca" fullname="Vincent Roca"> <organization /> </author>
-            <author initials="B" surname="Teibi" fullname="Belkacem Teibi"> <organization /> </author>
-            <date month="June" year="2019" />
-        </front>
-        <seriesInfo name='Work in' value='Progress' />
-        <seriesInfo name='Transport Area Working Group (TSVWG)' value='draft-ietf-tsvwg-rlc-fec-scheme (Work in Progress)' />
-    </reference>
 
    </references>
 

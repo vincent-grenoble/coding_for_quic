@@ -5,16 +5,16 @@
 nwcrg                                                           I. Swett
 Internet-Draft                                                    Google
 Intended status: Informational                            M-J. Montpetit
-Expires: September 4, 2020                                Triangle Video
+Expires: September 10, 2020                               Triangle Video
                                                                  V. Roca
                                                                    INRIA
                                                                F. Michel
                                                                UCLouvain
-                                                           March 3, 2020
+                                                           March 9, 2020
 
 
                             Coding for QUIC
-                  draft-swett-nwcrg-coding-for-quic-03
+                  draft-swett-nwcrg-coding-for-quic-04
 
 Abstract
 
@@ -47,13 +47,13 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 4, 2020.
+   This Internet-Draft will expire on September 10, 2020.
 
 
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 1]
+Swett, et al.          Expires September 10, 2020               [Page 1]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -101,15 +101,15 @@ Table of Contents
      5.1.  FEC Scheme Negotiation  . . . . . . . . . . . . . . . . .  13
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .  15
    7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
-   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  16
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  16
+   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  15
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
      9.1.  Normative References  . . . . . . . . . . . . . . . . . .  16
      9.2.  Informative References  . . . . . . . . . . . . . . . . .  16
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  17
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  16
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 2]
+Swett, et al.          Expires September 10, 2020               [Page 2]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -150,7 +150,7 @@ Internet-Draft               Coding for QUIC                  March 2020
    assume that the encoding operations compute a linear combination of
    QUIC packets, regardless of whether these codes are of block type (as
    with Reed-Solomon codes [RFC5510]) or sliding window type (as with
-   RLC codes [RLC]).
+   RLC codes [RFC8681]).
 
 2.  Definitions and Abbreviations
 
@@ -165,7 +165,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 3]
+Swett, et al.          Expires September 10, 2020               [Page 3]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -201,14 +201,14 @@ Internet-Draft               Coding for QUIC                  March 2020
    synchronize encoders and decoders.
 
    Block coding (e.g., Reed-Solomon [RFC5510]) and sliding window coding
-   (e.g., RLC [RLC]) are two broad classes of FEC codes [nc-taxonomy].
-   In the first case, the input flow must be first segmented into a
-   sequence of blocks, FEC encoding and decoding being performed
-   independently on a per-block basis.  In the second case rely, a
-   sliding encoding window continuously slides over the input flow.  It
-   is envisioned that the two classes of codes could be used to bring
-   FEC protection to QUIC, usually with an advantage for sliding window
-   codes when it comes to low latency communications.
+   (e.g., RLC [RFC8681]) are two broad classes of FEC codes
+   [nc-taxonomy].  In the first case, the input flow must be first
+   segmented into a sequence of blocks, FEC encoding and decoding being
+   performed independently on a per-block basis.  In the second case
+   rely, a sliding encoding window continuously slides over the input
+   flow.  It is envisioned that the two classes of codes could be used
+   to bring FEC protection to QUIC, usually with an advantage for
+   sliding window codes when it comes to low latency communications.
 
 3.2.  FEC Scheme Negotiation
 
@@ -221,7 +221,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 4]
+Swett, et al.          Expires September 10, 2020               [Page 4]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -277,7 +277,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 5]
+Swett, et al.          Expires September 10, 2020               [Page 5]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -333,7 +333,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 6]
+Swett, et al.          Expires September 10, 2020               [Page 6]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -389,7 +389,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 7]
+Swett, et al.          Expires September 10, 2020               [Page 7]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -445,7 +445,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 8]
+Swett, et al.          Expires September 10, 2020               [Page 8]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -501,7 +501,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020               [Page 9]
+Swett, et al.          Expires September 10, 2020               [Page 9]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -557,7 +557,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020              [Page 10]
+Swett, et al.          Expires September 10, 2020              [Page 10]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -613,7 +613,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020              [Page 11]
+Swett, et al.          Expires September 10, 2020              [Page 11]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -669,7 +669,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-Swett, et al.           Expires September 4, 2020              [Page 12]
+Swett, et al.          Expires September 10, 2020              [Page 12]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -705,10 +705,11 @@ Internet-Draft               Coding for QUIC                  March 2020
 5.1.  FEC Scheme Negotiation
 
    Before defining the transport parameters, we define two structures,
-   encoder_fec_scheme_t and decoder_fec_scheme_t, defined in Figure 6.
-   The config field is an opaque field allowing the decoder to define a
-   configuration for the FEC Scheme.  A FEC Scheme specification MUST
-   define the set of valid configurations for the FEC Scheme.
+   encoder_fec_scheme_t and decoder_fec_scheme_t, in Figure 6.  The
+   config field is an opaque field allowing the decoder to define
+   supported configuration information for the associated FEC Scheme.  A
+   FEC Scheme specification MUST define the set of valid configurations
+   for the FEC Scheme.
 
 
 
@@ -724,8 +725,7 @@ Internet-Draft               Coding for QUIC                  March 2020
 
 
 
-
-Swett, et al.           Expires September 4, 2020              [Page 13]
+Swett, et al.          Expires September 10, 2020              [Page 13]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
@@ -744,8 +744,15 @@ Internet-Draft               Coding for QUIC                  March 2020
 
     Figure 6: encoder_fec_scheme_t and decoder_fec_scheme_t structures.
 
-   We define three new transport parameters to negotiate the FEC Scheme
-   used during the connection.
+   The following three transport parameters are used by the QUIC
+   endpoints to negotiate the FEC Scheme used during the connection.
+
+   o  supported_encoder_fec_schemes: list of supported FEC schemes for
+      the encoding part listed from the most to the least preferred.
+      The value of this parameter consists in a list of
+      encoder_fec_scheme_t.  When announcing a FEC Scheme, the encoder
+      MUST be able handle every FEC Scheme configuration considered
+      valid.
 
    o  supported_decoder_fec_schemes: list of supported FEC schemes for
       the decoding part listed from the most to the least preferred.
@@ -753,15 +760,15 @@ Internet-Draft               Coding for QUIC                  March 2020
       decoder_fec_scheme_t, each one representing the ID of a supported
       FEC Scheme.
 
-   o  supported_encoder_fec_schemes: list of supported FEC schemes for
-      the decoding part listed from the most to the least preferred.
-      The value of this parameter consists in a list of
-      encoder_fec_scheme_t.  When announcing a FEC Scheme, the encoder
-      MUST be able handle every FEC Scheme configuration considered
-      valid.
+   o  receiving_symbol_size: the size in bytes of the symbols the peer
+      is willing to receive and recover.  The value is a 16-bits
+      integer.
 
-   o  receiving_symbol_size: the size of the symbols the peer is willing
-      to receive and recover.  The value is a 16-bits integer.
+   Since communications can be bidirectional, each QUIC endpoint can
+   provide the three parameters.  Conversely, providing a empty list
+   indicates this endpoint does not support FEC for the associated
+   communication path (e.g., an empty supported_decoder_fec_schemes list
+   indicates this endpoint cannot perform FEC decoding).
 
    The decoding FEC Scheme of a QUIC endpoint is set to the first FEC
    Scheme listed in its own supported_decoder_fec_schemes that also
@@ -771,56 +778,44 @@ Internet-Draft               Coding for QUIC                  March 2020
    own supported_encoder_fec_schemes.  The encoder-side symbol size (E)
    of a QUIC endpoint is set to the value announced by the peer's
    receiving_symbol_size transport parameter.  The decoder-side symbol
-   size of a QUIC endpoint is set to the value announced in its own
-   receiving_symbol_size transport parameter.
 
 
 
-
-
-
-
-
-Swett, et al.           Expires September 4, 2020              [Page 14]
+Swett, et al.          Expires September 10, 2020              [Page 14]
 
 Internet-Draft               Coding for QUIC                  March 2020
 
 
-   Host 1                                             Host 2
-         < - - - - - - - - - - - - - - - - - - - - - -
-               supported_decoder_fec_schemes{XOR}
+   size of a QUIC endpoint is set to the value announced in its own
+   receiving_symbol_size transport parameter.
+
+   Host 1                                                         Host 2
+         < - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
-               receiving_symbol_size{500}
+                         supported_decoder_fec_schemes{REED_SOLOMON,XOR}
+                                              receiving_symbol_size{500}
 
-         - - - - - - - - - - - - - - - - - - - - - - >
-         supported_decoder_fec_schemes{RLC_GF256,REED_SOLOMON}
-         supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
-         receiving_symbol_size{200}
+         - - - - - - - - - - - - - - - - - - - - - - - -- - -  - >
+   supported_encoder_fec_schemes{RLC_GF256,REED_SOLOMON,XOR}
+   supported_decoder_fec_schemes{RLC_GF256,REED_SOLOMON}
+   receiving_symbol_size{200}
 
-   ENCODER_FEC_SCHEME = XOR
+   ENCODER_FEC_SCHEME = REED_SOLOMON
    DECODER_FEC_SCHEME = RLC_GF256
    ENCODER_SYMBOL_SIZE = 500
    DECODER_SYMBOL_SIZE = 200
 
-                                    ENCODER_FEC_SCHEME = XOR
-                              DECODER_FEC_SCHEME = RLC_GF256
-                                   ENCODER_SYMBOL_SIZE = 200
-                                   DECODER_SYMBOL_SIZE = 500
-
-
+                                          ENCODER_FEC_SCHEME = RLC_GF256
+                                       DECODER_FEC_SCHEME = REED_SOLOMON
+                                               ENCODER_SYMBOL_SIZE = 200
+                                               DECODER_SYMBOL_SIZE = 500
 
    Figure 7: Example FEC Schemes negotiation during the QUIC handshake.
 
    It is possible that the QUIC endpoint that receives one or more FEC
    Scheme proposals from the initiator cannot select any of them.  In
-   that case the negotiation process fails...
-
-   Editor's notes:
-
-       *  So what?  How does it finishes?  Consequences?
-
-       *  Can the second QUIC endpoint change the proposed static
-          parameters?  In that case can the initator refuse?
+   that case the negotiation process fails and no FEC protection is
+   used.
 
 6.  Security Considerations
 
@@ -830,23 +825,22 @@ Internet-Draft               Coding for QUIC                  March 2020
 
    TBD
 
-
-
-
-
-
-
-
-Swett, et al.           Expires September 4, 2020              [Page 15]
-
-Internet-Draft               Coding for QUIC                  March 2020
-
-
 8.  Acknowledgments
 
    TBD
 
 9.  References
+
+
+
+
+
+
+
+Swett, et al.          Expires September 10, 2020              [Page 15]
+
+Internet-Draft               Coding for QUIC                  March 2020
+
 
 9.1.  Normative References
 
@@ -881,22 +875,10 @@ Internet-Draft               Coding for QUIC                  March 2020
               RFC 5510, DOI 10.17487/RFC5510, April 2009,
               <https://www.rfc-editor.org/info/rfc5510>.
 
-   [RLC]      Roca, V. and B. Teibi, "Sliding Window Random Linear Code
-              (RLC) Forward Erasure Correction (FEC) Scheme for
-              FECFRAME", Work in Progress, Transport Area Working Group
-              (TSVWG) draft-ietf-tsvwg-rlc-fec-scheme (Work in
-              Progress), June 2019, <https://tools.ietf.org/html/draft-
-              ietf-tsvwg-rlc-fec-scheme>.
-
-
-
-
-
-
-Swett, et al.           Expires September 4, 2020              [Page 16]
-
-Internet-Draft               Coding for QUIC                  March 2020
-
+   [RFC8681]  Roca, V. and B. Teibi, "Sliding Window Random Linear Code
+              (RLC) Forward Erasure Correction (FEC) Schemes for
+              FECFRAME", RFC 8681, DOI 10.17487/RFC8681, January 2020,
+              <https://www.rfc-editor.org/info/rfc8681>.
 
 Authors' Addresses
 
@@ -906,6 +888,14 @@ Authors' Addresses
    US
 
    Email: ianswett@google.com
+
+
+
+
+
+Swett, et al.          Expires September 10, 2020              [Page 16]
+
+Internet-Draft               Coding for QUIC                  March 2020
 
 
    Marie-Jose Montpetit
@@ -949,4 +939,14 @@ Authors' Addresses
 
 
 
-Swett, et al.           Expires September 4, 2020              [Page 17]
+
+
+
+
+
+
+
+
+
+
+Swett, et al.          Expires September 10, 2020              [Page 17]
